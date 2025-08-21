@@ -7,420 +7,187 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        .dashboard-card {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .dashboard-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-        }
-        .stock-low {
-            border-left: 4px solid #ef4444;
-        }
-        .stock-medium {
-            border-left: 4px solid #f59e0b;
-        }
-        .stock-high {
-            border-left: 4px solid #10b981;
-        }
-        .stock-out {
-            border-left: 4px solid #6b7280;
-        }
-        .fast-moving {
-            background: linear-gradient(135deg, #10b98115, #10b98105);
-        }
-        .slow-moving {
-            background: linear-gradient(135deg, #f59e0b15, #f59e0b05);
-        }
-    </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
+
     <!-- Header -->
     <header class="bg-white shadow-lg">
-        <div class="container mx-auto px-4 py-4">
-            <div class="flex justify-between items-center">
-                <div class="flex items-center space-x-4">
-                    <div class="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
-                        <i class="fas fa-boxes text-white text-xl"></i>
-                    </div>
-                    <h1 class="text-2xl font-bold text-gray-800">Stock Management System</h1>
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <div class="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-boxes text-white text-xl"></i>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <div class="relative">
-                        <input type="text" placeholder="Cari produk..." 
-                               class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <i class="fas fa-search absolute right-3 top-3 text-gray-400"></i>
-                    </div>
-                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                        <i class="fas fa-user text-blue-600"></i>
-                    </div>
-                </div>
+                <h1 class="text-2xl font-bold text-gray-800">Stock Management System</h1>
+            </div>
+            <div class="relative w-80">
+                <input id="searchInput" type="text" placeholder="Cari produk (nama / SKU)..." 
+                    class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <i class="fas fa-search absolute right-3 top-3 text-gray-400"></i>
             </div>
         </div>
     </header>
 
     <!-- Main Content -->
     <main class="container mx-auto px-4 py-8">
-        <!-- Dashboard Stats -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div class="dashboard-card bg-white rounded-xl p-6 shadow-md stock-high">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-gray-600 text-sm">Total Produk</p>
-                        <h2 class="text-3xl font-bold text-gray-800">156</h2>
-                    </div>
-                    <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                        <i class="fas fa-box text-green-600 text-xl"></i>
-                    </div>
-                </div>
-                <p class="text-green-600 text-sm mt-2"><i class="fas fa-arrow-up"></i> 12% dari bulan lalu</p>
-            </div>
-
-            <div class="dashboard-card bg-white rounded-xl p-6 shadow-md stock-medium">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-gray-600 text-sm">Stok Tersedia</p>
-                        <h2 class="text-3xl font-bold text-gray-800">89</h2>
-                    </div>
-                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                        <i class="fas fa-check-circle text-blue-600 text-xl"></i>
-                    </div>
-                </div>
-                <p class="text-blue-600 text-sm mt-2">57% dari total produk</p>
-            </div>
-
-            <div class="dashboard-card bg-white rounded-xl p-6 shadow-md stock-out">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-gray-600 text-sm">Stok Habis</p>
-                        <h2 class="text-3xl font-bold text-gray-800">24</h2>
-                    </div>
-                    <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-                        <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
-                    </div>
-                </div>
-                <p class="text-red-600 text-sm mt-2">Perlu restock segera</p>
-            </div>
-
-            <div class="dashboard-card bg-white rounded-xl p-6 shadow-md stock-low">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-gray-600 text-sm">Fast Moving</p>
-                        <h2 class="text-3xl font-bold text-gray-800">42</h2>
-                    </div>
-                    <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
-                        <i class="fas fa-bolt text-orange-600 text-xl"></i>
-                    </div>
-                </div>
-                <p class="text-orange-600 text-sm mt-2">27% dari total produk</p>
-            </div>
-        </div>
-
-        <!-- Charts Section -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <div class="bg-white rounded-xl p-6 shadow-md">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">Distribusi Stok</h3>
-                <canvas id="stockChart" height="250"></canvas>
-            </div>
-            <div class="bg-white rounded-xl p-6 shadow-md">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">Trend Fast/Slow Moving</h3>
-                <canvas id="movementChart" height="250"></canvas>
-            </div>
-        </div>
-
-        <!-- Products Table -->
+        <!-- Produk Table -->
         <div class="bg-white rounded-xl shadow-md overflow-hidden">
-            <div class="px-6 py-4 border-b">
+            <div class="px-6 py-4 border-b flex justify-between items-center">
                 <h3 class="text-lg font-semibold text-gray-800">Daftar Produk</h3>
-                <p class="text-gray-600 text-sm">Kelola stok produk Anda</p>
+                <button onclick="tambahProduk()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                    <i class="fas fa-plus mr-2"></i>Tambah Produk
+                </button>
             </div>
-            
-            <div class="p-6">
-                <div class="flex flex-wrap gap-4 mb-6">
-                    <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                        <i class="fas fa-plus mr-2"></i>Tambah Produk
-                    </button>
-                    <select class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option>Semua Kategori</option>
-                        <option>Fast Moving</option>
-                        <option>Slow Moving</option>
-                        <option>Stok Habis</option>
-                    </select>
-                    <select class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option>Urutkan: Terbaru</option>
-                        <option>Urutkan: Stok Terbanyak</option>
-                        <option>Urutkan: Stok Sedikit</option>
-                    </select>
-                </div>
 
-                <div class="overflow-x-auto">
-                    <table class="w-full table-auto">
-                        <thead>
-                            <tr class="bg-gray-50">
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Produk</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kategori</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stok</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            <!-- Fast Moving Products -->
-                            <tr class="fast-moving hover:bg-gray-50">
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="flex items-center">
-                                        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-                                            <i class="fas fa-box text-blue-600"></i>
-                                        </div>
-                                        <div>
-                                            <div class="text-sm font-medium text-gray-900">Laptop Gaming Pro</div>
-                                            <div class="text-sm text-gray-500">SKU: LP-001</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 py-1 text-xs font-semibold bg-orange-100 text-orange-800 rounded-full">Fast Moving</span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900">45 unit</div>
-                                    <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
-                                        <div class="bg-green-600 h-2 rounded-full" style="width: 75%"></div>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 py-1 text-xs font-semibold bg-green-100 text-green-800 rounded-full">Tersedia</span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                    <button class="text-blue-600 hover:text-blue-800 mr-3"><i class="fas fa-edit"></i></button>
-                                    <button class="text-red-600 hover:text-red-800"><i class="fas fa-trash"></i></button>
-                                </td>
-                            </tr>
-
-                            <tr class="fast-moving hover:bg-gray-50">
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="flex items-center">
-                                        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-                                            <i class="fas fa-box text-blue-600"></i>
-                                        </div>
-                                        <div>
-                                            <div class="text-sm font-medium text-gray-900">Smartphone Flagship</div>
-                                            <div class="text-sm text-gray-500">SKU: SP-002</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 py-1 text-xs font-semibold bg-orange-100 text-orange-800 rounded-full">Fast Moving</span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900">12 unit</div>
-                                    <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
-                                        <div class="bg-yellow-600 h-2 rounded-full" style="width: 40%"></div>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 py-1 text-xs font-semibold bg-yellow-100 text-yellow-800 rounded-full">Sedikit</span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                    <button class="text-blue-600 hover:text-blue-800 mr-3"><i class="fas fa-edit"></i></button>
-                                    <button class="text-red-600 hover:text-red-800"><i class="fas fa-trash"></i></button>
-                                </td>
-                            </tr>
-
-                            <!-- Slow Moving Products -->
-                            <tr class="slow-moving hover:bg-gray-50">
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="flex items-center">
-                                        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-                                            <i class="fas fa-box text-blue-600"></i>
-                                        </div>
-                                        <div>
-                                            <div class="text-sm font-medium text-gray-900">Printer Office</div>
-                                            <div class="text-sm text-gray-500">SKU: PR-003</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 py-1 text-xs font-semibold bg-gray-100 text-gray-800 rounded-full">Slow Moving</span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900">8 unit</div>
-                                    <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
-                                        <div class="bg-yellow-600 h-2 rounded-full" style="width: 27%"></div>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 py-1 text-xs font-semibold bg-yellow-100 text-yellow-800 rounded-full">Sedikit</span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                    <button class="text-blue-600 hover:text-blue-800 mr-3"><i class="fas fa-edit"></i></button>
-                                    <button class="text-red-600 hover:text-red-800"><i class="fas fa-trash"></i></button>
-                                </td>
-                            </tr>
-
-                            <!-- Out of Stock Products -->
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="flex items-center">
-                                        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-                                            <i class="fas fa-box text-blue-600"></i>
-                                        </div>
-                                        <div>
-                                            <div class="text-sm font-medium text-gray-900">Headset Gaming</div>
-                                            <div class="text-sm text-gray-500">SKU: HS-004</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 py-1 text-xs font-semibold bg-orange-100 text-orange-800 rounded-full">Fast Moving</span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900">0 unit</div>
-                                    <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
-                                        <div class="bg-red-600 h-2 rounded-full" style="width: 0%"></div>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 py-1 text-xs font-semibold bg-red-100 text-red-800 rounded-full">Habis</span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                    <button class="text-blue-600 hover:text-blue-800 mr-3"><i class="fas fa-edit"></i></button>
-                                    <button class="text-red-600 hover:text-red-800"><i class="fas fa-trash"></i></button>
-                                </td>
-                            </tr>
-
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="flex items-center">
-                                        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-                                            <i class="fas fa-box text-blue-600"></i>
-                                        </div>
-                                        <div>
-                                            <div class="text-sm font-medium text-gray-900">Monitor 27"</div>
-                                            <div class="text-sm text-gray-500">SKU: MN-005</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 py-1 text-xs font-semibold bg-gray-100 text-gray-800 rounded-full">Slow Moving</span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900">0 unit</div>
-                                    <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
-                                        <div class="bg-red-600 h-2 rounded-full" style="width: 0%"></div>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 py-1 text-xs font-semibold bg-red-100 text-red-800 rounded-full">Habis</span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                    <button class="text-blue-600 hover:text-blue-800 mr-3"><i class="fas fa-edit"></i></button>
-                                    <button class="text-red-600 hover:text-red-800"><i class="fas fa-trash"></i></button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+            <div class="p-6 overflow-x-auto">
+                <table class="w-full table-auto" id="productTable">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Produk</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SKU</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Stok</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Min</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Max</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productBody" class="bg-white divide-y divide-gray-200">
+                        <tr>
+                            <td class="px-6 py-4">Laptop Gaming Pro</td>
+                            <td class="px-6 py-4">LP-001</td>
+                            <td class="px-6 py-4 text-center">45</td>
+                            <td class="px-6 py-4 text-center">10</td>
+                            <td class="px-6 py-4 text-center">80</td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="status px-2 py-1 text-xs font-semibold bg-green-100 text-green-800 rounded-full">Tersedia</span>
+                            </td>
+                            <td class="px-6 py-4 text-center space-x-2">
+                                <button onclick="barangMasuk(this)" class="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600">+ Masuk</button>
+                                <button onclick="barangKeluar(this)" class="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600">- Keluar</button>
+                                <button onclick="ubahStok(this)" class="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600">Edit Min/Max</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-6 py-4">Smartphone Flagship</td>
+                            <td class="px-6 py-4">SP-002</td>
+                            <td class="px-6 py-4 text-center">12</td>
+                            <td class="px-6 py-4 text-center">5</td>
+                            <td class="px-6 py-4 text-center">50</td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="status px-2 py-1 text-xs font-semibold bg-yellow-100 text-yellow-800 rounded-full">Sedikit</span>
+                            </td>
+                            <td class="px-6 py-4 text-center space-x-2">
+                                <button onclick="barangMasuk(this)" class="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600">+ Masuk</button>
+                                <button onclick="barangKeluar(this)" class="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600">- Keluar</button>
+                                <button onclick="ubahStok(this)" class="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600">Edit Min/Max</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-white border-t mt-12">
-        <div class="container mx-auto px-4 py-6">
-            <div class="flex flex-col md:flex-row justify-between items-center">
-                <div class="mb-4 md:mb-0">
-                    <p class="text-gray-600">&copy; 2024 Stock Management System. All rights reserved.</p>
-                </div>
-                <div class="flex space-x-6">
-                    <a href="#" class="text-gray-600 hover:text-blue-600"><i class="fab fa-github"></i></a>
-                    <a href="#" class="text-gray-600 hover:text-blue-600"><i class="fab fa-linkedin"></i></a>
-                    <a href="#" class="text-gray-600 hover:text-blue-600"><i class="fab fa-twitter"></i></a>
-                </div>
-            </div>
-        </div>
-    </footer>
-
     <script>
-        // Initialize Charts
-        document.addEventListener('DOMContentLoaded', function() {
-            // Stock Distribution Chart
-            const stockCtx = document.getElementById('stockChart').getContext('2d');
-            new Chart(stockCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Stok Tersedia', 'Stok Sedikit', 'Stok Habis'],
-                    datasets: [{
-                        data: [89, 43, 24],
-                        backgroundColor: [
-                            '#10b981',
-                            '#f59e0b',
-                            '#ef4444'
-                        ],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
-                    }
+        // Fungsi pencarian produk
+        const searchInput = document.getElementById("searchInput");
+        searchInput.addEventListener("keyup", function() {
+            const searchTerm = this.value.toLowerCase();
+            const rows = document.querySelectorAll("#productBody tr");
+            rows.forEach(row => {
+                const nama = row.children[0].textContent.toLowerCase();
+                const sku = row.children[1].textContent.toLowerCase();
+                if (nama.includes(searchTerm) || sku.includes(searchTerm)) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
                 }
-            });
-
-            // Movement Trend Chart
-            const movementCtx = document.getElementById('movementChart').getContext('2d');
-            new Chart(movementCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun'],
-                    datasets: [
-                        {
-                            label: 'Fast Moving',
-                            data: [35, 38, 40, 42, 45, 42],
-                            backgroundColor: '#f59e0b'
-                        },
-                        {
-                            label: 'Slow Moving',
-                            data: [65, 62, 60, 58, 55, 58],
-                            backgroundColor: '#6b7280'
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        x: {
-                            grid: {
-                                display: false
-                            }
-                        },
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
-
-            // Search functionality
-            const searchInput = document.querySelector('input[type="text"]');
-            searchInput.addEventListener('keyup', function() {
-                const searchTerm = this.value.toLowerCase();
-                const rows = document.querySelectorAll('tbody tr');
-                
-                rows.forEach(row => {
-                    const productName = row.querySelector('.text-sm.font-medium').textContent.toLowerCase();
-                    if (productName.includes(searchTerm)) {
-                        row.style.display = '';
-                    } else {
-                        row.style.display = 'none';
-                    }
-                });
             });
         });
+
+        // Barang masuk
+        function barangMasuk(button) {
+            const row = button.closest("tr");
+            const stokCell = row.children[2];
+            let stok = parseInt(stokCell.textContent);
+            stok += parseInt(prompt("Masukkan jumlah barang masuk:", 1)) || 0;
+            stokCell.textContent = stok;
+            updateStatus(row);
+        }
+
+        // Barang keluar
+        function barangKeluar(button) {
+            const row = button.closest("tr");
+            const stokCell = row.children[2];
+            let stok = parseInt(stokCell.textContent);
+            const keluar = parseInt(prompt("Masukkan jumlah barang keluar:", 1)) || 0;
+            stok = Math.max(0, stok - keluar);
+            stokCell.textContent = stok;
+            updateStatus(row);
+        }
+
+        // Ubah min & max stok
+        function ubahStok(button) {
+            const row = button.closest("tr");
+            const minCell = row.children[3];
+            const maxCell = row.children[4];
+            minCell.textContent = parseInt(prompt("Masukkan stok minimum:", minCell.textContent)) || minCell.textContent;
+            maxCell.textContent = parseInt(prompt("Masukkan stok maksimum:", maxCell.textContent)) || maxCell.textContent;
+            updateStatus(row);
+        }
+
+        // Update status stok otomatis
+        function updateStatus(row) {
+            const stok = parseInt(row.children[2].textContent);
+            const min = parseInt(row.children[3].textContent);
+            const max = parseInt(row.children[4].textContent);
+            const statusCell = row.querySelector(".status");
+
+            if (stok === 0) {
+                statusCell.textContent = "Habis";
+                statusCell.className = "status px-2 py-1 text-xs font-semibold bg-red-100 text-red-800 rounded-full";
+            } else if (stok < min) {
+                statusCell.textContent = "Sedikit";
+                statusCell.className = "status px-2 py-1 text-xs font-semibold bg-yellow-100 text-yellow-800 rounded-full";
+            } else if (stok > max) {
+                statusCell.textContent = "Overstock";
+                statusCell.className = "status px-2 py-1 text-xs font-semibold bg-blue-100 text-blue-800 rounded-full";
+            } else {
+                statusCell.textContent = "Tersedia";
+                statusCell.className = "status px-2 py-1 text-xs font-semibold bg-green-100 text-green-800 rounded-full";
+            }
+        }
+
+        // Tambah produk baru
+        function tambahProduk() {
+            const nama = prompt("Masukkan nama produk:");
+            const sku = prompt("Masukkan SKU produk:");
+            const stok = parseInt(prompt("Masukkan stok awal:", 0)) || 0;
+            const min = parseInt(prompt("Masukkan stok minimum:", 1)) || 1;
+            const max = parseInt(prompt("Masukkan stok maksimum:", 100)) || 100;
+
+            if (!nama || !sku) return;
+
+            const tbody = document.getElementById("productBody");
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td class="px-6 py-4">${nama}</td>
+                <td class="px-6 py-4">${sku}</td>
+                <td class="px-6 py-4 text-center">${stok}</td>
+                <td class="px-6 py-4 text-center">${min}</td>
+                <td class="px-6 py-4 text-center">${max}</td>
+                <td class="px-6 py-4 text-center">
+                    <span class="status px-2 py-1 text-xs font-semibold bg-green-100 text-green-800 rounded-full">Tersedia</span>
+                </td>
+                <td class="px-6 py-4 text-center space-x-2">
+                    <button onclick="barangMasuk(this)" class="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600">+ Masuk</button>
+                    <button onclick="barangKeluar(this)" class="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600">- Keluar</button>
+                    <button onclick="ubahStok(this)" class="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600">Edit Min/Max</button>
+                </td>
+            `;
+            tbody.appendChild(row);
+            updateStatus(row);
+        }
     </script>
 </body>
 </html>
-
