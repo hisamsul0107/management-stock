@@ -1,193 +1,459 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stock Management System</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Inventori Sederhana — HTML Saja</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background: #0b1220; }
+    .navbar, .card-header { background: #0b1220; color: #fff; }
+    .card { border: 1px solid #24324a; background: #0f172a; color: #cbd5e1; }
+    .table { color: #cbd5e1; }
+    .table thead th { color: #93c5fd; }
+    .form-control, .form-select { background:#0b1220; border-color:#24324a; color:#e2e8f0; }
+    .form-control::placeholder { color:#64748b; }
+    .btn-outline-secondary, .btn-outline-danger, .btn-outline-primary { border-color:#334155; color:#e2e8f0; }
+    .btn-outline-secondary:hover, .btn-outline-danger:hover, .btn-outline-primary:hover { background:#1f2937; }
+    .toast { background:#0f172a; color:#e2e8f0; border:1px solid #334155; }
+    a.nav-link { cursor: pointer; }
+  </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container">
+    <a class="navbar-brand fw-semibold" href="#">📦 Inventori</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExample" aria-controls="navbarsExample" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarsExample">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#transaksi">Transaksi</a></li>
+        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#database">Database</a></li>
+        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#pengaturan">Pengaturan</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
 
-    <!-- Header -->
-    <header class="bg-white shadow-lg">
-        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-            <div class="flex items-center space-x-4">
-                <div class="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
-                    <i class="fas fa-boxes text-white text-xl"></i>
+<main class="container my-4">
+  <div class="tab-content">
+    <!-- Transaksi -->
+    <section class="tab-pane fade show active" id="transaksi">
+      <div class="row g-3">
+        <div class="col-lg-5">
+          <div class="card h-100">
+            <div class="card-header">Masuk / Keluar Barang</div>
+            <div class="card-body">
+              <form id="formTransaksi" class="row g-3">
+                <div class="col-12">
+                  <label class="form-label">Jenis Transaksi</label>
+                  <div class="d-flex gap-3">
+                    <div class="form-check">
+                      <input class="form-check-input" type="radio" name="tipe" id="tipeMasuk" value="Masuk" checked>
+                      <label class="form-check-label" for="tipeMasuk">Masuk</label>
+                    </div>
+                    <div class="form-check">
+                      <input class="form-check-input" type="radio" name="tipe" id="tipeKeluar" value="Keluar">
+                      <label class="form-check-label" for="tipeKeluar">Keluar</label>
+                    </div>
+                  </div>
                 </div>
-                <h1 class="text-2xl font-bold text-gray-800">Stock Management System</h1>
+                <div class="col-12">
+                  <label for="kodeBarang" class="form-label">Kode / Art. No</label>
+                  <input type="text" class="form-control" id="kodeBarang" placeholder="Contoh: ART-001" required list="listArtNo">
+                  <datalist id="listArtNo"></datalist>
+                </div>
+                <div class="col-12">
+                  <label for="namaBarang" class="form-label">Nama / Deskripsi</label>
+                  <input type="text" class="form-control" id="namaBarang" placeholder="Nama barang" required>
+                </div>
+                <div class="col-md-6">
+                  <label for="unitBarang" class="form-label">Unit (D-Unit)</label>
+                  <input type="text" class="form-control" id="unitBarang" placeholder="pcs / box / kg" required>
+                </div>
+                <div class="col-md-6">
+                  <label for="qtyBarang" class="form-label">Qty</label>
+                  <input type="number" class="form-control" id="qtyBarang" min="1" step="1" required>
+                </div>
+                <div class="col-md-6">
+                  <label for="hargaBarang" class="form-label">Harga Aktual (opsional)</label>
+                  <input type="number" class="form-control" id="hargaBarang" min="0" step="0.01" placeholder="IDR">
+                  <div class="form-text">Jika diisi, harga akan memperbarui <em>Actual-Price</em> item.</div>
+                </div>
+                <div class="col-12">
+                  <button type="submit" class="btn btn-primary w-100">Simpan Transaksi</button>
+                </div>
+              </form>
             </div>
-            <div class="relative w-80">
-                <input id="searchInput" type="text" placeholder="Cari produk (nama / SKU)..." 
-                    class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <i class="fas fa-search absolute right-3 top-3 text-gray-400"></i>
-            </div>
+          </div>
         </div>
-    </header>
 
-    <!-- Main Content -->
-    <main class="container mx-auto px-4 py-8">
-        <!-- Produk Table -->
-        <div class="bg-white rounded-xl shadow-md overflow-hidden">
-            <div class="px-6 py-4 border-b flex justify-between items-center">
-                <h3 class="text-lg font-semibold text-gray-800">Daftar Produk</h3>
-                <button onclick="tambahProduk()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                    <i class="fas fa-plus mr-2"></i>Tambah Produk
-                </button>
+        <div class="col-lg-7">
+          <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <span>Riwayat Transaksi</span>
+              <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-outline-secondary" id="btnExportTransaksi">Export JSON</button>
+                <label class="btn btn-sm btn-outline-secondary mb-0">
+                  Import <input type="file" id="importTransaksi" hidden accept="application/json">
+                </label>
+              </div>
             </div>
-
-            <div class="p-6 overflow-x-auto">
-                <table class="w-full table-auto" id="productTable">
-                    <thead>
-                        <tr class="bg-gray-50">
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Produk</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SKU</th>
-                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Stok</th>
-                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Min</th>
-                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Max</th>
-                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="productBody" class="bg-white divide-y divide-gray-200">
-                        <tr>
-                            <td class="px-6 py-4">Laptop Gaming Pro</td>
-                            <td class="px-6 py-4">LP-001</td>
-                            <td class="px-6 py-4 text-center">45</td>
-                            <td class="px-6 py-4 text-center">10</td>
-                            <td class="px-6 py-4 text-center">80</td>
-                            <td class="px-6 py-4 text-center">
-                                <span class="status px-2 py-1 text-xs font-semibold bg-green-100 text-green-800 rounded-full">Tersedia</span>
-                            </td>
-                            <td class="px-6 py-4 text-center space-x-2">
-                                <button onclick="barangMasuk(this)" class="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600">+ Masuk</button>
-                                <button onclick="barangKeluar(this)" class="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600">- Keluar</button>
-                                <button onclick="ubahStok(this)" class="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600">Edit Min/Max</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="px-6 py-4">Smartphone Flagship</td>
-                            <td class="px-6 py-4">SP-002</td>
-                            <td class="px-6 py-4 text-center">12</td>
-                            <td class="px-6 py-4 text-center">5</td>
-                            <td class="px-6 py-4 text-center">50</td>
-                            <td class="px-6 py-4 text-center">
-                                <span class="status px-2 py-1 text-xs font-semibold bg-yellow-100 text-yellow-800 rounded-full">Sedikit</span>
-                            </td>
-                            <td class="px-6 py-4 text-center space-x-2">
-                                <button onclick="barangMasuk(this)" class="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600">+ Masuk</button>
-                                <button onclick="barangKeluar(this)" class="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600">- Keluar</button>
-                                <button onclick="ubahStok(this)" class="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600">Edit Min/Max</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div class="card-body table-responsive">
+              <table class="table table-sm align-middle" id="tabelTransaksi">
+                <thead>
+                  <tr>
+                    <th>Tanggal</th>
+                    <th>Jenis</th>
+                    <th>Art. No</th>
+                    <th>Deskripsi</th>
+                    <th>Unit</th>
+                    <th>Qty</th>
+                    <th>Harga</th>
+                    <th>Jumlah</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
             </div>
+          </div>
         </div>
-    </main>
+      </div>
+    </section>
 
-    <script>
-        // Fungsi pencarian produk
-        const searchInput = document.getElementById("searchInput");
-        searchInput.addEventListener("keyup", function() {
-            const searchTerm = this.value.toLowerCase();
-            const rows = document.querySelectorAll("#productBody tr");
-            rows.forEach(row => {
-                const nama = row.children[0].textContent.toLowerCase();
-                const sku = row.children[1].textContent.toLowerCase();
-                if (nama.includes(searchTerm) || sku.includes(searchTerm)) {
-                    row.style.display = "";
-                } else {
-                    row.style.display = "none";
-                }
-            });
-        });
+    <!-- Database -->
+    <section class="tab-pane fade" id="database">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span>Master Database</span>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-secondary" id="btnExportDB">Export JSON</button>
+            <label class="btn btn-sm btn-outline-secondary mb-0">
+              Import <input type="file" id="importDB" hidden accept="application/json">
+            </label>
+          </div>
+        </div>
+        <div class="card-body">
+          <form id="formItem" class="row g-3">
+            <div class="col-md-3">
+              <label class="form-label">Art. No</label>
+              <input type="text" class="form-control" id="artNo" required>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Description</label>
+              <input type="text" class="form-control" id="description" required>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">D-Unit</label>
+              <input type="text" class="form-control" id="dUnit" required>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Actual-Price</label>
+              <input type="number" class="form-control" id="actualPrice" min="0" step="0.01" required>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">SOH QTY</label>
+              <input type="number" class="form-control" id="sohQty" min="0" step="1" required>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Req QTY</label>
+              <input type="number" class="form-control" id="reqQty" min="0" step="1" value="0">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Min Stock</label>
+              <input type="number" class="form-control" id="minStock" min="0" step="1" value="0">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Max Stock</label>
+              <input type="number" class="form-control" id="maxStock" min="0" step="1" value="0">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Supplier Name</label>
+              <input type="text" class="form-control" id="supplierName">
+            </div>
+            <div class="col-12 d-flex gap-2">
+              <button type="submit" class="btn btn-success">Simpan / Update Item</button>
+              <button type="button" id="btnResetForm" class="btn btn-outline-secondary">Reset</button>
+              <button type="button" id="btnHapusItem" class="btn btn-outline-danger">Hapus Item</button>
+            </div>
+          </form>
 
-        // Barang masuk
-        function barangMasuk(button) {
-            const row = button.closest("tr");
-            const stokCell = row.children[2];
-            let stok = parseInt(stokCell.textContent);
-            stok += parseInt(prompt("Masukkan jumlah barang masuk:", 1)) || 0;
-            stokCell.textContent = stok;
-            updateStatus(row);
-        }
+          <hr>
+          <div class="table-responsive">
+            <table class="table table-hover table-sm align-middle" id="tabelDB">
+              <thead>
+                <tr>
+                  <th>Art. No</th>
+                  <th>Description</th>
+                  <th>D-Unit</th>
+                  <th>Actual-Price</th>
+                  <th>SOH QTY</th>
+                  <th>Actual Amount (SOH)</th>
+                  <th>Req QTY</th>
+                  <th>Actual Amount (Request)</th>
+                  <th>Min Stock</th>
+                  <th>Max Stock</th>
+                  <th>Supplier Name</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
 
-        // Barang keluar
-        function barangKeluar(button) {
-            const row = button.closest("tr");
-            const stokCell = row.children[2];
-            let stok = parseInt(stokCell.textContent);
-            const keluar = parseInt(prompt("Masukkan jumlah barang keluar:", 1)) || 0;
-            stok = Math.max(0, stok - keluar);
-            stokCell.textContent = stok;
-            updateStatus(row);
-        }
+    <!-- Pengaturan -->
+    <section class="tab-pane fade" id="pengaturan">
+      <div class="card">
+        <div class="card-header">Pengaturan & Data</div>
+        <div class="card-body">
+          <div class="d-flex flex-wrap gap-2">
+            <button id="btnBackupSemua" class="btn btn-outline-primary">Backup Semua (JSON)</button>
+            <button id="btnRestoreContoh" class="btn btn-outline-secondary">Muat Data Contoh</button>
+            <button id="btnHapusSemua" class="btn btn-outline-danger">Hapus Semua Data</button>
+          </div>
+          <p class="mt-3 text-muted small">
+            Data disimpan di browser Anda (localStorage). Gunakan export/import untuk berbagi atau pindah perangkat.
+          </p>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
 
-        // Ubah min & max stok
-        function ubahStok(button) {
-            const row = button.closest("tr");
-            const minCell = row.children[3];
-            const maxCell = row.children[4];
-            minCell.textContent = parseInt(prompt("Masukkan stok minimum:", minCell.textContent)) || minCell.textContent;
-            maxCell.textContent = parseInt(prompt("Masukkan stok maksimum:", maxCell.textContent)) || maxCell.textContent;
-            updateStatus(row);
-        }
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+  <div id="appToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="toast-header">
+      <strong class="me-auto">Inventori</strong>
+      <small>just now</small>
+      <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+    <div class="toast-body"></div>
+  </div>
+</div>
 
-        // Update status stok otomatis
-        function updateStatus(row) {
-            const stok = parseInt(row.children[2].textContent);
-            const min = parseInt(row.children[3].textContent);
-            const max = parseInt(row.children[4].textContent);
-            const statusCell = row.querySelector(".status");
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const APP_KEY = 'inventori_v1';
+const TX_KEY  = 'inventori_tx_v1';
+const state = { db: [], tx: [] };
 
-            if (stok === 0) {
-                statusCell.textContent = "Habis";
-                statusCell.className = "status px-2 py-1 text-xs font-semibold bg-red-100 text-red-800 rounded-full";
-            } else if (stok < min) {
-                statusCell.textContent = "Sedikit";
-                statusCell.className = "status px-2 py-1 text-xs font-semibold bg-yellow-100 text-yellow-800 rounded-full";
-            } else if (stok > max) {
-                statusCell.textContent = "Overstock";
-                statusCell.className = "status px-2 py-1 text-xs font-semibold bg-blue-100 text-blue-800 rounded-full";
-            } else {
-                statusCell.textContent = "Tersedia";
-                statusCell.className = "status px-2 py-1 text-xs font-semibold bg-green-100 text-green-800 rounded-full";
-            }
-        }
+const fmtIDR = (n) => (n ?? 0).toLocaleString('id-ID', { style: 'currency', currency: 'IDR' });
+const qs = (sel, el=document) => el.querySelector(sel);
+const qsa = (sel, el=document) => [...el.querySelectorAll(sel)];
 
-        // Tambah produk baru
-        function tambahProduk() {
-            const nama = prompt("Masukkan nama produk:");
-            const sku = prompt("Masukkan SKU produk:");
-            const stok = parseInt(prompt("Masukkan stok awal:", 0)) || 0;
-            const min = parseInt(prompt("Masukkan stok minimum:", 1)) || 1;
-            const max = parseInt(prompt("Masukkan stok maksimum:", 100)) || 100;
+function load() {
+  try { state.db = JSON.parse(localStorage.getItem(APP_KEY)) || [];
+        state.tx = JSON.parse(localStorage.getItem(TX_KEY)) || []; }
+  catch { state.db = []; state.tx = []; }
+}
+function save() {
+  localStorage.setItem(APP_KEY, JSON.stringify(state.db));
+  localStorage.setItem(TX_KEY, JSON.stringify(state.tx));
+}
+function toast(msg) {
+  const t = qs('#appToast');
+  qs('.toast-body', t).textContent = msg;
+  new bootstrap.Toast(t, { delay: 2000 }).show();
+}
 
-            if (!nama || !sku) return;
+function recalcAndRender() { renderDatalist(); renderDBTable(); renderTxTable(); }
+function renderDatalist() {
+  const dl = qs('#listArtNo');
+  dl.innerHTML = state.db.map(it => \`<option value="\${it.artNo}">\${it.description}</option>\`).join('');
+}
+function computeAmounts(it) {
+  const actualAmountSOH = (Number(it.actualPrice) || 0) * (Number(it.sohQty) || 0);
+  const actualAmountReq = (Number(it.actualPrice) || 0) * (Number(it.reqQty) || 0);
+  return { actualAmountSOH, actualAmountReq };
+}
+function renderDBTable() {
+  const tbody = qs('#tabelDB tbody');
+  tbody.innerHTML = state.db.map(it => {
+    const { actualAmountSOH, actualAmountReq } = computeAmounts(it);
+    const lowClass = (Number(it.sohQty) <= Number(it.minStock)) ? 'table-danger' : '';
+    return \`<tr class="\${lowClass}" data-artno="\${it.artNo}">
+      <td>\${it.artNo}</td>
+      <td>\${it.description}</td>
+      <td>\${it.dUnit}</td>
+      <td>\${fmtIDR(Number(it.actualPrice) || 0)}</td>
+      <td>\${Number(it.sohQty) || 0}</td>
+      <td>\${fmtIDR(actualAmountSOH)}</td>
+      <td>\${Number(it.reqQty) || 0}</td>
+      <td>\${fmtIDR(actualAmountReq)}</td>
+      <td>\${Number(it.minStock) || 0}</td>
+      <td>\${Number(it.maxStock) || 0}</td>
+      <td>\${it.supplierName || ''}</td>
+    </tr>\`;
+  }).join('');
+  qsa('#tabelDB tbody tr').forEach(tr => {
+    tr.addEventListener('click', () => {
+      const artNo = tr.getAttribute('data-artno');
+      const it = state.db.find(x => x.artNo === artNo);
+      if (it) fillFormItem(it);
+    });
+  });
+}
+function renderTxTable() {
+  const tbody = qs('#tabelTransaksi tbody');
+  tbody.innerHTML = state.tx.slice().reverse().map(tx => {
+    const amount = (Number(tx.harga) || 0) * (Number(tx.qty) || 0);
+    return \`<tr>
+      <td>\${new Date(tx.tanggal).toLocaleString('id-ID')}</td>
+      <td>\${tx.tipe}</td>
+      <td>\${tx.artNo}</td>
+      <td>\${tx.description || ''}</td>
+      <td>\${tx.unit || ''}</td>
+      <td>\${tx.qty}</td>
+      <td>\${tx.harga != null ? fmtIDR(Number(tx.harga)) : '-'}</td>
+      <td>\${amount ? fmtIDR(amount) : '-'}</td>
+    </tr>\`;
+  }).join('');
+}
 
-            const tbody = document.getElementById("productBody");
-            const row = document.createElement("tr");
-            row.innerHTML = `
-                <td class="px-6 py-4">${nama}</td>
-                <td class="px-6 py-4">${sku}</td>
-                <td class="px-6 py-4 text-center">${stok}</td>
-                <td class="px-6 py-4 text-center">${min}</td>
-                <td class="px-6 py-4 text-center">${max}</td>
-                <td class="px-6 py-4 text-center">
-                    <span class="status px-2 py-1 text-xs font-semibold bg-green-100 text-green-800 rounded-full">Tersedia</span>
-                </td>
-                <td class="px-6 py-4 text-center space-x-2">
-                    <button onclick="barangMasuk(this)" class="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600">+ Masuk</button>
-                    <button onclick="barangKeluar(this)" class="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600">- Keluar</button>
-                    <button onclick="ubahStok(this)" class="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600">Edit Min/Max</button>
-                </td>
-            `;
-            tbody.appendChild(row);
-            updateStatus(row);
-        }
-    </script>
+function fillFormItem(it) {
+  qs('#artNo').value = it.artNo;
+  qs('#description').value = it.description;
+  qs('#dUnit').value = it.dUnit;
+  qs('#actualPrice').value = it.actualPrice ?? 0;
+  qs('#sohQty').value = it.sohQty ?? 0;
+  qs('#reqQty').value = it.reqQty ?? 0;
+  qs('#minStock').value = it.minStock ?? 0;
+  qs('#maxStock').value = it.maxStock ?? 0;
+  qs('#supplierName').value = it.supplierName ?? '';
+}
+function getFormItem() {
+  return {
+    artNo: qs('#artNo').value.trim(),
+    description: qs('#description').value.trim(),
+    dUnit: qs('#dUnit').value.trim(),
+    actualPrice: Number(qs('#actualPrice').value || 0),
+    sohQty: Number(qs('#sohQty').value || 0),
+    reqQty: Number(qs('#reqQty').value || 0),
+    minStock: Number(qs('#minStock').value || 0),
+    maxStock: Number(qs('#maxStock').value || 0),
+    supplierName: qs('#supplierName').value.trim()
+  };
+}
+function upsertItem(item) {
+  const idx = state.db.findIndex(x => x.artNo === item.artNo);
+  if (idx >= 0) state.db[idx] = item; else state.db.push(item);
+  save(); recalcAndRender();
+}
+
+function setupFormItemHandlers() {
+  qs('#formItem').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const item = getFormItem();
+    if (!item.artNo || !item.description) return toast('Lengkapi Art. No dan Description');
+    if (item.maxStock && item.minStock && item.maxStock < item.minStock) return toast('Max Stock tidak boleh < Min Stock');
+    upsertItem(item); toast('Item disimpan.');
+  });
+  qs('#btnResetForm').addEventListener('click', () => qs('#formItem').reset());
+  qs('#btnHapusItem').addEventListener('click', () => {
+    const artNo = qs('#artNo').value.trim();
+    if (!artNo) return toast('Pilih item untuk dihapus.');
+    const before = state.db.length;
+    state.db = state.db.filter(x => x.artNo !== artNo);
+    if (state.db.length < before) { save(); recalcAndRender(); toast('Item dihapus.'); }
+    else toast('Item tidak ditemukan.');
+  });
+}
+
+function setupTransaksiHandlers() {
+  const f = qs('#formTransaksi');
+  f.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const tipe = qs('input[name="tipe"]:checked').value;
+    const artNo = qs('#kodeBarang').value.trim();
+    const desc  = qs('#namaBarang').value.trim();
+    const unit  = qs('#unitBarang').value.trim();
+    const qty   = Number(qs('#qtyBarang').value);
+    const harga = qs('#hargaBarang').value ? Number(qs('#hargaBarang').value) : null;
+    if (!artNo || !desc || !unit || !qty || qty <= 0) return toast('Lengkapi data transaksi.');
+
+    let it = state.db.find(x => x.artNo === artNo);
+    if (!it) {
+      it = { artNo, description: desc, dUnit: unit, actualPrice: Number(harga) || 0, sohQty: 0, reqQty: 0, minStock: 0, maxStock: 0, supplierName: '' };
+      state.db.push(it);
+    } else {
+      it.description = desc;
+      it.dUnit = unit;
+      if (harga != null) it.actualPrice = Number(harga);
+    }
+    if (tipe === 'Masuk') it.sohQty = Number(it.sohQty || 0) + qty;
+    else { it.sohQty = Number(it.sohQty || 0) - qty; if (it.sohQty < 0) it.sohQty = 0; }
+
+    state.tx.push({ tanggal: new Date().toISOString(), tipe, artNo, description: desc, unit, qty, harga });
+    save(); recalcAndRender(); f.reset(); toast('Transaksi disimpan.');
+  });
+}
+
+function download(filename, dataStr) {
+  const blob = new Blob([dataStr], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+function setupExportImport() {
+  qs('#btnExportDB').addEventListener('click', () => download('database.json', JSON.stringify(state.db, null, 2)));
+  qs('#btnExportTransaksi').addEventListener('click', () => download('transaksi.json', JSON.stringify(state.tx, null, 2)));
+  qs('#importDB').addEventListener('change', (e) => {
+    const file = e.target.files[0]; if (!file) return;
+    const r = new FileReader();
+    r.onload = () => { try {
+        const data = JSON.parse(r.result);
+        if (Array.isArray(data)) { state.db = data; save(); recalcAndRender(); toast('Database diimpor.'); }
+        else throw new Error();
+      } catch { toast('Gagal impor database.'); } };
+    r.readAsText(file);
+  });
+  qs('#importTransaksi').addEventListener('change', (e) => {
+    const file = e.target.files[0]; if (!file) return;
+    const r = new FileReader();
+    r.onload = () => { try {
+        const data = JSON.parse(r.result);
+        if (Array.isArray(data)) { state.tx = data; save(); recalcAndRender(); toast('Transaksi diimpor.'); }
+        else throw new Error();
+      } catch { toast('Gagal impor transaksi.'); } };
+    r.readAsText(file);
+  });
+}
+
+function setupPengaturan() {
+  qs('#btnHapusSemua').addEventListener('click', () => {
+    if (!confirm('Hapus semua data?')) return;
+    localStorage.removeItem(APP_KEY);
+    localStorage.removeItem(TX_KEY);
+    load(); recalcAndRender(); toast('Semua data dihapus.');
+  });
+  qs('#btnRestoreContoh').addEventListener('click', () => {
+    const contoh = [
+      { artNo: 'ART-001', description: 'Bolpoin Biru', dUnit: 'pcs', actualPrice: 4500, sohQty: 120, reqQty: 10, minStock: 50, maxStock: 300, supplierName: 'PT Alat Tulis' },
+      { artNo: 'ART-002', description: 'Kertas A4 80gsm', dUnit: 'rim', actualPrice: 52000, sohQty: 25, reqQty: 5, minStock: 10, maxStock: 50, supplierName: 'CV Kertas Jaya' },
+      { artNo: 'ART-003', description: 'Lakban Coklat 2"', dUnit: 'roll', actualPrice: 9000, sohQty: 60, reqQty: 0, minStock: 20, maxStock: 200, supplierName: 'UD Kemasan' }
+    ];
+    state.db = contoh; state.tx = []; save(); recalcAndRender(); toast('Data contoh dimuat.');
+  });
+  qs('#btnBackupSemua').addEventListener('click', () => {
+    const payload = { exportedAt: new Date().toISOString(), db: state.db, tx: state.tx };
+    download('backup_inventori.json', JSON.stringify(payload, null, 2));
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  load();
+  setupFormItemHandlers();
+  setupTransaksiHandlers();
+  setupExportImport();
+  setupPengaturan();
+  recalcAndRender();
+  const firstTab = new bootstrap.Tab(document.querySelector('[data-bs-toggle="tab"].active'));
+  firstTab.show();
+});
+</script>
 </body>
 </html>
