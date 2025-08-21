@@ -1,459 +1,577 @@
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Inventori Sederhana — HTML Saja</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inventory Management — Login & Roles</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body { background: #0b1220; }
-    .navbar, .card-header { background: #0b1220; color: #fff; }
-    .card { border: 1px solid #24324a; background: #0f172a; color: #cbd5e1; }
-    .table { color: #cbd5e1; }
-    .table thead th { color: #93c5fd; }
-    .form-control, .form-select { background:#0b1220; border-color:#24324a; color:#e2e8f0; }
-    .form-control::placeholder { color:#64748b; }
-    .btn-outline-secondary, .btn-outline-danger, .btn-outline-primary { border-color:#334155; color:#e2e8f0; }
-    .btn-outline-secondary:hover, .btn-outline-danger:hover, .btn-outline-primary:hover { background:#1f2937; }
-    .toast { background:#0f172a; color:#e2e8f0; border:1px solid #334155; }
-    a.nav-link { cursor: pointer; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Arial, sans-serif; background: #f5f7fa; color: #2c3e50; }
+    /* Login */
+    .login-wrap {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
+    }
+    .login-card {
+      width: 100%; max-width: 420px; background: #fff; border-radius: 10px; box-shadow: 0 8px 30px rgba(0,0,0,.08);
+      padding: 24px;
+    }
+    .login-card h1 { margin: 0 0 6px; font-size: 22px; }
+    .muted { color: #6b7280; font-size: 13px; margin-bottom: 18px; }
+    .form-control { width: 100%; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 8px; margin-bottom: 10px; }
+    .btn { padding: 10px 14px; border: 1px solid transparent; border-radius: 8px; cursor: pointer; }
+    .btn-primary { background: #2563eb; color: #fff; }
+    .btn-secondary { background: #e5e7eb; color: #111827; }
+    .hint { background: #f3f4f6; padding: 10px; border-radius: 8px; font-size: 12px; margin-top: 8px; }
+    /* App layout */
+    .app { display: none; }
+    .sidebar {
+      width: 260px; background: #111827; color: #e5e7eb; position: fixed; inset: 0 auto 0 0; padding: 18px 14px; overflow-y: auto;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 18px; margin-bottom: 16px; }
+    .brand small { font-weight: 500; color: #9ca3af; }
+    .user-box { background: #1f2937; padding: 10px; border-radius: 8px; margin-bottom: 14px; font-size: 13px; }
+    .menu { list-style: none; padding: 0; margin: 0; }
+    .menu li { padding: 10px 12px; border-radius: 8px; cursor: pointer; margin: 4px 0; }
+    .menu li:hover, .menu li.active { background: #374151; }
+    .menu li[hidden] { display: none !important; }
+    .sidebar .actions { display: flex; gap: 8px; margin-top: 12px; }
+    .main { margin-left: 260px; padding: 22px; }
+    h2 { margin: 0 0 12px; }
+    .card { background: #fff; border-radius: 10px; padding: 16px; box-shadow: 0 8px 30px rgba(0,0,0,.05); margin-bottom: 16px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; border-bottom: 1px solid #e5e7eb; padding: 10px; font-size: 14px; }
+    th { background: #f9fafb; }
+    tr.low-stock { background: #fff1f2; }
+    .grid { display: grid; gap: 12px; }
+    .grid.col2 { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .grid.col3 { grid-template-columns: repeat(3, minmax(0,1fr)); }
+    .grid.col4 { grid-template-columns: repeat(4, minmax(0,1fr)); }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field input, .field select { padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 8px; }
+    .toolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .toolbar .spacer { flex: 1; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; background: #e5e7eb; }
+    .badge.primary { background: #dbeafe; color: #1d4ed8; }
+    .badge.red { background: #fee2e2; color: #991b1b; }
+    .btn-outline { background: transparent; border: 1px solid #d1d5db; }
+    .hidden { display: none !important; }
+    @media (max-width: 900px) {
+      .sidebar { position: fixed; transform: translateX(-100%); transition: transform .2s; z-index: 20; }
+      .sidebar.open { transform: translateX(0); }
+      .main { margin-left: 0; }
+      .show-on-mobile { display: inline-flex !important; }
+      .hide-on-mobile { display: none !important; }
+    }
+    .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .iconbtn { border: none; background: #111827; color: #fff; padding: 8px 10px; border-radius: 8px; cursor: pointer; display: none; }
   </style>
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <div class="container">
-    <a class="navbar-brand fw-semibold" href="#">📦 Inventori</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExample" aria-controls="navbarsExample" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarsExample">
-      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-        <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#transaksi">Transaksi</a></li>
-        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#database">Database</a></li>
-        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#pengaturan">Pengaturan</a></li>
+  <!-- LOGIN -->
+  <section class="login-wrap" id="loginView">
+    <div class="login-card">
+      <h1>Masuk ke Aplikasi Inventori</h1>
+      <div class="muted">Demo login (data tersimpan lokal & bukan untuk produksi).</div>
+      <input class="form-control" id="loginUsername" placeholder="Username" autocomplete="username" />
+      <input class="form-control" id="loginPassword" placeholder="Password" type="password" autocomplete="current-password" />
+      <button class="btn btn-primary" id="btnLogin">Masuk</button>
+      <div class="hint">
+        <strong>Demo akun:</strong><br>
+        Admin → <code>admin / admin123</code><br>
+        Staff → <code>staff / staff123</code>
+      </div>
+    </div>
+  </section>
+
+  <!-- APP -->
+  <section class="app" id="appView">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">📦 Inventori <small id="appVersion">v1.0</small></div>
+      <div class="user-box">
+        Masuk sebagai: <strong id="uName">-</strong><br>
+        Peran: <span class="badge primary" id="uRole">-</span>
+      </div>
+      <ul class="menu" id="menu">
+        <li data-page="dashboard" class="active">Dashboard</li>
+        <li data-page="form">Form Transaksi</li>
+        <li data-page="masuk">Data Masuk</li>
+        <li data-page="keluar">Data Keluar</li>
+        <li data-page="database" data-role="admin">Database Barang</li>
+        <li data-page="riwayat" data-role="admin">Riwayat Transaksi</li>
+        <li data-page="users" data-role="admin">Pengguna & Roles</li>
       </ul>
-    </div>
-  </div>
-</nav>
-
-<main class="container my-4">
-  <div class="tab-content">
-    <!-- Transaksi -->
-    <section class="tab-pane fade show active" id="transaksi">
-      <div class="row g-3">
-        <div class="col-lg-5">
-          <div class="card h-100">
-            <div class="card-header">Masuk / Keluar Barang</div>
-            <div class="card-body">
-              <form id="formTransaksi" class="row g-3">
-                <div class="col-12">
-                  <label class="form-label">Jenis Transaksi</label>
-                  <div class="d-flex gap-3">
-                    <div class="form-check">
-                      <input class="form-check-input" type="radio" name="tipe" id="tipeMasuk" value="Masuk" checked>
-                      <label class="form-check-label" for="tipeMasuk">Masuk</label>
-                    </div>
-                    <div class="form-check">
-                      <input class="form-check-input" type="radio" name="tipe" id="tipeKeluar" value="Keluar">
-                      <label class="form-check-label" for="tipeKeluar">Keluar</label>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-12">
-                  <label for="kodeBarang" class="form-label">Kode / Art. No</label>
-                  <input type="text" class="form-control" id="kodeBarang" placeholder="Contoh: ART-001" required list="listArtNo">
-                  <datalist id="listArtNo"></datalist>
-                </div>
-                <div class="col-12">
-                  <label for="namaBarang" class="form-label">Nama / Deskripsi</label>
-                  <input type="text" class="form-control" id="namaBarang" placeholder="Nama barang" required>
-                </div>
-                <div class="col-md-6">
-                  <label for="unitBarang" class="form-label">Unit (D-Unit)</label>
-                  <input type="text" class="form-control" id="unitBarang" placeholder="pcs / box / kg" required>
-                </div>
-                <div class="col-md-6">
-                  <label for="qtyBarang" class="form-label">Qty</label>
-                  <input type="number" class="form-control" id="qtyBarang" min="1" step="1" required>
-                </div>
-                <div class="col-md-6">
-                  <label for="hargaBarang" class="form-label">Harga Aktual (opsional)</label>
-                  <input type="number" class="form-control" id="hargaBarang" min="0" step="0.01" placeholder="IDR">
-                  <div class="form-text">Jika diisi, harga akan memperbarui <em>Actual-Price</em> item.</div>
-                </div>
-                <div class="col-12">
-                  <button type="submit" class="btn btn-primary w-100">Simpan Transaksi</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-lg-7">
-          <div class="card h-100">
-            <div class="card-header d-flex justify-content-between align-items-center">
-              <span>Riwayat Transaksi</span>
-              <div class="d-flex gap-2">
-                <button class="btn btn-sm btn-outline-secondary" id="btnExportTransaksi">Export JSON</button>
-                <label class="btn btn-sm btn-outline-secondary mb-0">
-                  Import <input type="file" id="importTransaksi" hidden accept="application/json">
-                </label>
-              </div>
-            </div>
-            <div class="card-body table-responsive">
-              <table class="table table-sm align-middle" id="tabelTransaksi">
-                <thead>
-                  <tr>
-                    <th>Tanggal</th>
-                    <th>Jenis</th>
-                    <th>Art. No</th>
-                    <th>Deskripsi</th>
-                    <th>Unit</th>
-                    <th>Qty</th>
-                    <th>Harga</th>
-                    <th>Jumlah</th>
-                  </tr>
-                </thead>
-                <tbody></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+      <div class="actions">
+        <button class="btn btn-secondary btn-outline" id="btnExport" data-role="admin">Export</button>
+        <label class="btn btn-secondary btn-outline" data-role="admin">
+          Import <input type="file" id="fileImport" accept="application/json" hidden />
+        </label>
+        <button class="btn btn-secondary btn-outline" id="btnLogout">Keluar</button>
       </div>
-    </section>
+    </aside>
 
-    <!-- Database -->
-    <section class="tab-pane fade" id="database">
-      <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <span>Master Database</span>
-          <div class="d-flex gap-2">
-            <button class="btn btn-sm btn-outline-secondary" id="btnExportDB">Export JSON</button>
-            <label class="btn btn-sm btn-outline-secondary mb-0">
-              Import <input type="file" id="importDB" hidden accept="application/json">
-            </label>
-          </div>
-        </div>
-        <div class="card-body">
-          <form id="formItem" class="row g-3">
-            <div class="col-md-3">
-              <label class="form-label">Art. No</label>
-              <input type="text" class="form-control" id="artNo" required>
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">Description</label>
-              <input type="text" class="form-control" id="description" required>
-            </div>
-            <div class="col-md-2">
-              <label class="form-label">D-Unit</label>
-              <input type="text" class="form-control" id="dUnit" required>
-            </div>
-            <div class="col-md-2">
-              <label class="form-label">Actual-Price</label>
-              <input type="number" class="form-control" id="actualPrice" min="0" step="0.01" required>
-            </div>
-            <div class="col-md-2">
-              <label class="form-label">SOH QTY</label>
-              <input type="number" class="form-control" id="sohQty" min="0" step="1" required>
-            </div>
-            <div class="col-md-2">
-              <label class="form-label">Req QTY</label>
-              <input type="number" class="form-control" id="reqQty" min="0" step="1" value="0">
-            </div>
-            <div class="col-md-2">
-              <label class="form-label">Min Stock</label>
-              <input type="number" class="form-control" id="minStock" min="0" step="1" value="0">
-            </div>
-            <div class="col-md-2">
-              <label class="form-label">Max Stock</label>
-              <input type="number" class="form-control" id="maxStock" min="0" step="1" value="0">
-            </div>
-            <div class="col-md-4">
-              <label class="form-label">Supplier Name</label>
-              <input type="text" class="form-control" id="supplierName">
-            </div>
-            <div class="col-12 d-flex gap-2">
-              <button type="submit" class="btn btn-success">Simpan / Update Item</button>
-              <button type="button" id="btnResetForm" class="btn btn-outline-secondary">Reset</button>
-              <button type="button" id="btnHapusItem" class="btn btn-outline-danger">Hapus Item</button>
-            </div>
-          </form>
-
-          <hr>
-          <div class="table-responsive">
-            <table class="table table-hover table-sm align-middle" id="tabelDB">
-              <thead>
-                <tr>
-                  <th>Art. No</th>
-                  <th>Description</th>
-                  <th>D-Unit</th>
-                  <th>Actual-Price</th>
-                  <th>SOH QTY</th>
-                  <th>Actual Amount (SOH)</th>
-                  <th>Req QTY</th>
-                  <th>Actual Amount (Request)</th>
-                  <th>Min Stock</th>
-                  <th>Max Stock</th>
-                  <th>Supplier Name</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
-          </div>
-        </div>
+    <main class="main">
+      <div class="topbar">
+        <button class="iconbtn show-on-mobile" id="btnOpenSidebar">☰ Menu</button>
+        <div></div>
       </div>
-    </section>
 
-    <!-- Pengaturan -->
-    <section class="tab-pane fade" id="pengaturan">
-      <div class="card">
-        <div class="card-header">Pengaturan & Data</div>
-        <div class="card-body">
-          <div class="d-flex flex-wrap gap-2">
-            <button id="btnBackupSemua" class="btn btn-outline-primary">Backup Semua (JSON)</button>
-            <button id="btnRestoreContoh" class="btn btn-outline-secondary">Muat Data Contoh</button>
-            <button id="btnHapusSemua" class="btn btn-outline-danger">Hapus Semua Data</button>
+      <!-- DASHBOARD -->
+      <section id="page-dashboard" class="card">
+        <h2>Dashboard</h2>
+        <div class="grid col3">
+          <div class="card">
+            <div>Total Barang</div>
+            <div id="statTotalBarang" style="font-size:24px;font-weight:700">0</div>
           </div>
-          <p class="mt-3 text-muted small">
-            Data disimpan di browser Anda (localStorage). Gunakan export/import untuk berbagi atau pindah perangkat.
-          </p>
+          <div class="card">
+            <div>Total Stok</div>
+            <div id="statTotalStok" style="font-size:24px;font-weight:700">0</div>
+          </div>
+          <div class="card">
+            <div>Hampir Habis</div>
+            <div id="statHampirHabis" style="font-size:24px;font-weight:700">0</div>
+          </div>
         </div>
-      </div>
-    </section>
-  </div>
-</main>
+        <canvas id="stokChart" height="120"></canvas>
+        <div class="card">
+          <h3 style="margin-bottom:8px;">Transaksi Terakhir</h3>
+          <table>
+            <thead><tr><th>Waktu</th><th>Jenis</th><th>Art.No</th><th>Nama</th><th>Qty</th></tr></thead>
+            <tbody id="tblLastTx"></tbody>
+          </table>
+        </div>
+      </section>
 
-<div class="toast-container position-fixed bottom-0 end-0 p-3">
-  <div id="appToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-    <div class="toast-header">
-      <strong class="me-auto">Inventori</strong>
-      <small>just now</small>
-      <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-    </div>
-    <div class="toast-body"></div>
-  </div>
-</div>
+      <!-- FORM TRANSAKSI -->
+      <section id="page-form" class="card hidden">
+        <h2>Form Transaksi</h2>
+        <div class="grid col4">
+          <div class="field"><label>Art. No</label><input id="f_artNo" placeholder="ART-001" list="dlArt"/></div>
+          <div class="field"><label>Description</label><input id="f_desc" placeholder="Nama barang"/></div>
+          <div class="field"><label>D-Unit</label><input id="f_unit" placeholder="pcs/box/kg"/></div>
+          <div class="field"><label>Actual Price</label><input id="f_price" type="number" min="0" step="0.01" placeholder="0"/></div>
+          <div class="field"><label>Qty</label><input id="f_qty" type="number" min="1" step="1" placeholder="1"/></div>
+          <div class="field"><label>Jenis</label>
+            <select id="f_type"><option>Masuk</option><option>Keluar</option></select></div>
+          <div class="field"><label>&nbsp;</label><button class="btn btn-primary" id="btnSubmitTx">Simpan</button></div>
+        </div>
+        <datalist id="dlArt"></datalist>
+        <div class="hint" style="margin-top:10px;">Tips: mengisi harga akan memperbarui <em>Actual Price</em> item.</div>
+      </section>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-const APP_KEY = 'inventori_v1';
-const TX_KEY  = 'inventori_tx_v1';
-const state = { db: [], tx: [] };
+      <!-- DATA MASUK -->
+      <section id="page-masuk" class="card hidden">
+        <h2>Data Masuk</h2>
+        <div class="toolbar">
+          <input class="form-control" id="filterMasuk" placeholder="Cari..." />
+          <div class="spacer"></div>
+          <span class="badge">Total: <span id="countMasuk">0</span></span>
+        </div>
+        <table>
+          <thead><tr><th>Waktu</th><th>Art.No</th><th>Nama</th><th>Unit</th><th>Qty</th><th>Harga</th></tr></thead>
+          <tbody id="tblMasuk"></tbody>
+        </table>
+      </section>
 
-const fmtIDR = (n) => (n ?? 0).toLocaleString('id-ID', { style: 'currency', currency: 'IDR' });
-const qs = (sel, el=document) => el.querySelector(sel);
-const qsa = (sel, el=document) => [...el.querySelectorAll(sel)];
+      <!-- DATA KELUAR -->
+      <section id="page-keluar" class="card hidden">
+        <h2>Data Keluar</h2>
+        <div class="toolbar">
+          <input class="form-control" id="filterKeluar" placeholder="Cari..." />
+          <div class="spacer"></div>
+          <span class="badge">Total: <span id="countKeluar">0</span></span>
+        </div>
+        <table>
+          <thead><tr><th>Waktu</th><th>Art.No</th><th>Nama</th><th>Unit</th><th>Qty</th><th>Harga</th></tr></thead>
+          <tbody id="tblKeluar"></tbody>
+        </table>
+      </section>
 
-function load() {
-  try { state.db = JSON.parse(localStorage.getItem(APP_KEY)) || [];
-        state.tx = JSON.parse(localStorage.getItem(TX_KEY)) || []; }
-  catch { state.db = []; state.tx = []; }
-}
-function save() {
-  localStorage.setItem(APP_KEY, JSON.stringify(state.db));
-  localStorage.setItem(TX_KEY, JSON.stringify(state.tx));
-}
-function toast(msg) {
-  const t = qs('#appToast');
-  qs('.toast-body', t).textContent = msg;
-  new bootstrap.Toast(t, { delay: 2000 }).show();
-}
+      <!-- DATABASE -->
+      <section id="page-database" class="card hidden">
+        <h2>Database Barang</h2>
+        <div class="toolbar">
+          <input class="form-control" id="filterDB" placeholder="Cari kode/nama/supplier..." />
+          <div class="spacer"></div>
+          <button class="btn btn-secondary btn-outline" id="btnNewItem">Item Baru</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Art. No</th><th>Description</th><th>D-Unit</th><th>Actual Price</th>
+              <th>SOH QTY</th><th>Actual Amount (SOH)</th><th>Req QTY</th><th>Actual Amount (Request)</th>
+              <th>Min Stock</th><th>Max Stock</th><th>Supplier</th>
+            </tr>
+          </thead>
+          <tbody id="tblDB"></tbody>
+        </table>
+      </section>
 
-function recalcAndRender() { renderDatalist(); renderDBTable(); renderTxTable(); }
-function renderDatalist() {
-  const dl = qs('#listArtNo');
-  dl.innerHTML = state.db.map(it => \`<option value="\${it.artNo}">\${it.description}</option>\`).join('');
-}
-function computeAmounts(it) {
-  const actualAmountSOH = (Number(it.actualPrice) || 0) * (Number(it.sohQty) || 0);
-  const actualAmountReq = (Number(it.actualPrice) || 0) * (Number(it.reqQty) || 0);
-  return { actualAmountSOH, actualAmountReq };
-}
-function renderDBTable() {
-  const tbody = qs('#tabelDB tbody');
-  tbody.innerHTML = state.db.map(it => {
-    const { actualAmountSOH, actualAmountReq } = computeAmounts(it);
-    const lowClass = (Number(it.sohQty) <= Number(it.minStock)) ? 'table-danger' : '';
-    return \`<tr class="\${lowClass}" data-artno="\${it.artNo}">
-      <td>\${it.artNo}</td>
-      <td>\${it.description}</td>
-      <td>\${it.dUnit}</td>
-      <td>\${fmtIDR(Number(it.actualPrice) || 0)}</td>
-      <td>\${Number(it.sohQty) || 0}</td>
-      <td>\${fmtIDR(actualAmountSOH)}</td>
-      <td>\${Number(it.reqQty) || 0}</td>
-      <td>\${fmtIDR(actualAmountReq)}</td>
-      <td>\${Number(it.minStock) || 0}</td>
-      <td>\${Number(it.maxStock) || 0}</td>
-      <td>\${it.supplierName || ''}</td>
-    </tr>\`;
-  }).join('');
-  qsa('#tabelDB tbody tr').forEach(tr => {
-    tr.addEventListener('click', () => {
-      const artNo = tr.getAttribute('data-artno');
-      const it = state.db.find(x => x.artNo === artNo);
-      if (it) fillFormItem(it);
-    });
-  });
-}
-function renderTxTable() {
-  const tbody = qs('#tabelTransaksi tbody');
-  tbody.innerHTML = state.tx.slice().reverse().map(tx => {
-    const amount = (Number(tx.harga) || 0) * (Number(tx.qty) || 0);
-    return \`<tr>
-      <td>\${new Date(tx.tanggal).toLocaleString('id-ID')}</td>
-      <td>\${tx.tipe}</td>
-      <td>\${tx.artNo}</td>
-      <td>\${tx.description || ''}</td>
-      <td>\${tx.unit || ''}</td>
-      <td>\${tx.qty}</td>
-      <td>\${tx.harga != null ? fmtIDR(Number(tx.harga)) : '-'}</td>
-      <td>\${amount ? fmtIDR(amount) : '-'}</td>
-    </tr>\`;
-  }).join('');
-}
+      <!-- RIWAYAT -->
+      <section id="page-riwayat" class="card hidden">
+        <h2>Riwayat Transaksi</h2>
+        <div class="toolbar">
+          <input class="form-control" id="filterHistory" placeholder="Cari..." />
+        </div>
+        <table>
+          <thead><tr><th>Waktu</th><th>Jenis</th><th>Art.No</th><th>Nama</th><th>Unit</th><th>Qty</th><th>Harga</th></tr></thead>
+          <tbody id="tblHistory"></tbody>
+        </table>
+      </section>
 
-function fillFormItem(it) {
-  qs('#artNo').value = it.artNo;
-  qs('#description').value = it.description;
-  qs('#dUnit').value = it.dUnit;
-  qs('#actualPrice').value = it.actualPrice ?? 0;
-  qs('#sohQty').value = it.sohQty ?? 0;
-  qs('#reqQty').value = it.reqQty ?? 0;
-  qs('#minStock').value = it.minStock ?? 0;
-  qs('#maxStock').value = it.maxStock ?? 0;
-  qs('#supplierName').value = it.supplierName ?? '';
-}
-function getFormItem() {
-  return {
-    artNo: qs('#artNo').value.trim(),
-    description: qs('#description').value.trim(),
-    dUnit: qs('#dUnit').value.trim(),
-    actualPrice: Number(qs('#actualPrice').value || 0),
-    sohQty: Number(qs('#sohQty').value || 0),
-    reqQty: Number(qs('#reqQty').value || 0),
-    minStock: Number(qs('#minStock').value || 0),
-    maxStock: Number(qs('#maxStock').value || 0),
-    supplierName: qs('#supplierName').value.trim()
-  };
-}
-function upsertItem(item) {
-  const idx = state.db.findIndex(x => x.artNo === item.artNo);
-  if (idx >= 0) state.db[idx] = item; else state.db.push(item);
-  save(); recalcAndRender();
-}
+      <!-- USERS & ROLES (Admin) -->
+      <section id="page-users" class="card hidden">
+        <h2>Pengguna & Roles</h2>
+        <div class="grid col3">
+          <div class="field"><label>Username</label><input id="u_username" /></div>
+          <div class="field"><label>Peran</label>
+            <select id="u_role"><option value="staff">staff</option><option value="admin">admin</option></select></div>
+          <div class="field"><label>Password</label><input id="u_password" type="password" /></div>
+          <div class="field"><label>&nbsp;</label><button class="btn btn-primary" id="btnAddUser">Tambah / Reset</button></div>
+        </div>
+        <table style="margin-top:10px">
+          <thead><tr><th>Username</th><th>Role</th><th>Aksi</th></tr></thead>
+          <tbody id="tblUsers"></tbody>
+        </table>
+        <div class="hint" style="margin-top:8px;">
+          Catatan: kredensial disimpan di browser (localStorage) sebagai hash. Jangan gunakan untuk produksi.
+        </div>
+      </section>
 
-function setupFormItemHandlers() {
-  qs('#formItem').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const item = getFormItem();
-    if (!item.artNo || !item.description) return toast('Lengkapi Art. No dan Description');
-    if (item.maxStock && item.minStock && item.maxStock < item.minStock) return toast('Max Stock tidak boleh < Min Stock');
-    upsertItem(item); toast('Item disimpan.');
-  });
-  qs('#btnResetForm').addEventListener('click', () => qs('#formItem').reset());
-  qs('#btnHapusItem').addEventListener('click', () => {
-    const artNo = qs('#artNo').value.trim();
-    if (!artNo) return toast('Pilih item untuk dihapus.');
-    const before = state.db.length;
-    state.db = state.db.filter(x => x.artNo !== artNo);
-    if (state.db.length < before) { save(); recalcAndRender(); toast('Item dihapus.'); }
-    else toast('Item tidak ditemukan.');
-  });
-}
+    </main>
+  </section>
 
-function setupTransaksiHandlers() {
-  const f = qs('#formTransaksi');
-  f.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const tipe = qs('input[name="tipe"]:checked').value;
-    const artNo = qs('#kodeBarang').value.trim();
-    const desc  = qs('#namaBarang').value.trim();
-    const unit  = qs('#unitBarang').value.trim();
-    const qty   = Number(qs('#qtyBarang').value);
-    const harga = qs('#hargaBarang').value ? Number(qs('#hargaBarang').value) : null;
-    if (!artNo || !desc || !unit || !qty || qty <= 0) return toast('Lengkapi data transaksi.');
+  <script>
+    // ===== Utilities & Storage =====
+    const KEYS = {
+      USERS: 'inv_users_v1',
+      SESSION: 'inv_session_v1',
+      DB: 'inv_db_v1',
+      TX: 'inv_tx_v1'
+    };
 
-    let it = state.db.find(x => x.artNo === artNo);
-    if (!it) {
-      it = { artNo, description: desc, dUnit: unit, actualPrice: Number(harga) || 0, sohQty: 0, reqQty: 0, minStock: 0, maxStock: 0, supplierName: '' };
-      state.db.push(it);
-    } else {
-      it.description = desc;
-      it.dUnit = unit;
-      if (harga != null) it.actualPrice = Number(harga);
+    const state = {
+      users: [], // {username, role, passHash}
+      session: null, // {username, role}
+      db: [], // master items
+      tx: []  // transactions
+    };
+
+    const fmtIDR = n => (n ?? 0).toLocaleString('id-ID', { style: 'currency', currency: 'IDR' });
+    const $ = (sel, el=document) => el.querySelector(sel);
+    const $$ = (sel, el=document) => [...el.querySelectorAll(sel)];
+
+    function saveAll() {
+      localStorage.setItem(KEYS.USERS, JSON.stringify(state.users));
+      localStorage.setItem(KEYS.SESSION, JSON.stringify(state.session));
+      localStorage.setItem(KEYS.DB, JSON.stringify(state.db));
+      localStorage.setItem(KEYS.TX, JSON.stringify(state.tx));
     }
-    if (tipe === 'Masuk') it.sohQty = Number(it.sohQty || 0) + qty;
-    else { it.sohQty = Number(it.sohQty || 0) - qty; if (it.sohQty < 0) it.sohQty = 0; }
+    function loadAll() {
+      state.users = JSON.parse(localStorage.getItem(KEYS.USERS) || '[]');
+      state.session = JSON.parse(localStorage.getItem(KEYS.SESSION) || 'null');
+      state.db = JSON.parse(localStorage.getItem(KEYS.DB) || '[]');
+      state.tx = JSON.parse(localStorage.getItem(KEYS.TX) || '[]');
+    }
 
-    state.tx.push({ tanggal: new Date().toISOString(), tipe, artNo, description: desc, unit, qty, harga });
-    save(); recalcAndRender(); f.reset(); toast('Transaksi disimpan.');
-  });
-}
+    // SHA-256 hash using Web Crypto
+    async function sha256(str) {
+      const enc = new TextEncoder().encode(str);
+      const buf = await crypto.subtle.digest('SHA-256', enc);
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+    }
 
-function download(filename, dataStr) {
-  const blob = new Blob([dataStr], {type: 'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = filename; a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
-function setupExportImport() {
-  qs('#btnExportDB').addEventListener('click', () => download('database.json', JSON.stringify(state.db, null, 2)));
-  qs('#btnExportTransaksi').addEventListener('click', () => download('transaksi.json', JSON.stringify(state.tx, null, 2)));
-  qs('#importDB').addEventListener('change', (e) => {
-    const file = e.target.files[0]; if (!file) return;
-    const r = new FileReader();
-    r.onload = () => { try {
-        const data = JSON.parse(r.result);
-        if (Array.isArray(data)) { state.db = data; save(); recalcAndRender(); toast('Database diimpor.'); }
-        else throw new Error();
-      } catch { toast('Gagal impor database.'); } };
-    r.readAsText(file);
-  });
-  qs('#importTransaksi').addEventListener('change', (e) => {
-    const file = e.target.files[0]; if (!file) return;
-    const r = new FileReader();
-    r.onload = () => { try {
-        const data = JSON.parse(r.result);
-        if (Array.isArray(data)) { state.tx = data; save(); recalcAndRender(); toast('Transaksi diimpor.'); }
-        else throw new Error();
-      } catch { toast('Gagal impor transaksi.'); } };
-    r.readAsText(file);
-  });
-}
+    async function ensureDefaultUsers() {
+      if (state.users.length === 0) {
+        state.users = [
+          { username: 'admin', role: 'admin', passHash: await sha256('admin123') },
+          { username: 'staff', role: 'staff', passHash: await sha256('staff123') }
+        ];
+        saveAll();
+      }
+    }
 
-function setupPengaturan() {
-  qs('#btnHapusSemua').addEventListener('click', () => {
-    if (!confirm('Hapus semua data?')) return;
-    localStorage.removeItem(APP_KEY);
-    localStorage.removeItem(TX_KEY);
-    load(); recalcAndRender(); toast('Semua data dihapus.');
-  });
-  qs('#btnRestoreContoh').addEventListener('click', () => {
-    const contoh = [
-      { artNo: 'ART-001', description: 'Bolpoin Biru', dUnit: 'pcs', actualPrice: 4500, sohQty: 120, reqQty: 10, minStock: 50, maxStock: 300, supplierName: 'PT Alat Tulis' },
-      { artNo: 'ART-002', description: 'Kertas A4 80gsm', dUnit: 'rim', actualPrice: 52000, sohQty: 25, reqQty: 5, minStock: 10, maxStock: 50, supplierName: 'CV Kertas Jaya' },
-      { artNo: 'ART-003', description: 'Lakban Coklat 2"', dUnit: 'roll', actualPrice: 9000, sohQty: 60, reqQty: 0, minStock: 20, maxStock: 200, supplierName: 'UD Kemasan' }
-    ];
-    state.db = contoh; state.tx = []; save(); recalcAndRender(); toast('Data contoh dimuat.');
-  });
-  qs('#btnBackupSemua').addEventListener('click', () => {
-    const payload = { exportedAt: new Date().toISOString(), db: state.db, tx: state.tx };
-    download('backup_inventori.json', JSON.stringify(payload, null, 2));
-  });
-}
+    // ===== Auth =====
+    async function login(username, password) {
+      const user = state.users.find(u => u.username === username);
+      if (!user) return false;
+      const passHash = await sha256(password);
+      if (passHash !== user.passHash) return false;
+      state.session = { username: user.username, role: user.role };
+      saveAll();
+      return true;
+    }
+    function logout() {
+      state.session = null; saveAll(); location.reload();
+    }
 
-document.addEventListener('DOMContentLoaded', () => {
-  load();
-  setupFormItemHandlers();
-  setupTransaksiHandlers();
-  setupExportImport();
-  setupPengaturan();
-  recalcAndRender();
-  const firstTab = new bootstrap.Tab(document.querySelector('[data-bs-toggle="tab"].active'));
-  firstTab.show();
-});
-</script>
+    // ===== Menus & Navigation =====
+    function navApplyRole() {
+      const role = state.session?.role;
+      $('#uName').textContent = state.session?.username || '-';
+      $('#uRole').textContent = role || '-';
+      // hide menu items requiring admin
+      $$('#menu [data-role="admin"]').forEach(li => {
+        li.hidden = (role !== 'admin');
+      });
+      // hide export/import for non-admin
+      $$('.actions [data-role="admin"]').forEach(btn => btn.hidden = (role !== 'admin'));
+    }
+    function showPage(name) {
+      $$('.menu li').forEach(li => li.classList.remove('active'));
+      const targetLi = $(`.menu li[data-page="${name}"]`);
+      if (targetLi) targetLi.classList.add('active');
+      $$('main section').forEach(sec => sec.classList.add('hidden'));
+      const sec = $(`#page-${name}`);
+      if (sec) sec.classList.remove('hidden');
+      if (name === 'dashboard') refreshDashboard();
+      if (name === 'database') renderDB();
+      if (name === 'masuk' || name === 'keluar') renderInOut();
+      if (name === 'riwayat') renderHistory();
+      if (name === 'users') renderUsers();
+      // close sidebar on mobile
+      $('#sidebar').classList.remove('open');
+    }
+
+    // ===== Data helpers =====
+    function findItem(artNo) { return state.db.find(x => x.artNo === artNo); }
+    function upsertItem(item) {
+      const i = state.db.findIndex(x => x.artNo === item.artNo);
+      if (i >= 0) state.db[i] = item; else state.db.push(item);
+    }
+    function computeAmounts(it) {
+      const price = Number(it.actualPrice) || 0;
+      const soh = Number(it.sohQty) || 0;
+      const req = Number(it.reqQty) || 0;
+      return { amtSOH: price * soh, amtReq: price * req };
+    }
+
+    // ===== Rendering =====
+    function renderDL() {
+      $('#dlArt').innerHTML = state.db.map(it => `<option value="${it.artNo}">${it.description}</option>`).join('');
+    }
+    function renderDB() {
+      const term = $('#filterDB').value?.toLowerCase() || '';
+      const tbody = $('#tblDB'); tbody.innerHTML = '';
+      state.db
+        .filter(it => (it.artNo+it.description+(it.supplierName||'')).toLowerCase().includes(term))
+        .forEach(it => {
+          const { amtSOH, amtReq } = computeAmounts(it);
+          const tr = document.createElement('tr');
+          if ((Number(it.sohQty)||0) <= (Number(it.minStock)||0)) tr.classList.add('low-stock');
+          tr.innerHTML = `
+            <td>${it.artNo}</td>
+            <td>${it.description}</td>
+            <td>${it.dUnit}</td>
+            <td>${fmtIDR(Number(it.actualPrice)||0)}</td>
+            <td>${Number(it.sohQty)||0}</td>
+            <td>${fmtIDR(amtSOH)}</td>
+            <td>${Number(it.reqQty)||0}</td>
+            <td>${fmtIDR(amtReq)}</td>
+            <td>${Number(it.minStock)||0}</td>
+            <td>${Number(it.maxStock)||0}</td>
+            <td>${it.supplierName||''}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+    }
+    function renderInOut() {
+      const masukTbody = $('#tblMasuk'); masukTbody.innerHTML = '';
+      const keluarTbody = $('#tblKeluar'); keluarTbody.innerHTML = '';
+      const filterIn = $('#filterMasuk').value?.toLowerCase() || '';
+      const filterOut = $('#filterKeluar').value?.toLowerCase() || '';
+      let countIn=0, countOut=0;
+      state.tx.filter(t => t.type === 'Masuk').forEach(t => {
+        const line = `${t.time} ${t.artNo} ${t.desc} ${t.unit} ${t.qty} ${t.price}`.toLowerCase();
+        if (!line.includes(filterIn)) return;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${t.time}</td><td>${t.artNo}</td><td>${t.desc}</td><td>${t.unit}</td><td>${t.qty}</td><td>${t.price?fmtIDR(t.price):'-'}</td>`;
+        masukTbody.appendChild(tr); countIn++;
+      });
+      state.tx.filter(t => t.type === 'Keluar').forEach(t => {
+        const line = `${t.time} ${t.artNo} ${t.desc} ${t.unit} ${t.qty} ${t.price}`.toLowerCase();
+        if (!line.includes(filterOut)) return;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${t.time}</td><td>${t.artNo}</td><td>${t.desc}</td><td>${t.unit}</td><td>${t.qty}</td><td>${t.price?fmtIDR(t.price):'-'}</td>`;
+        keluarTbody.appendChild(tr); countOut++;
+      });
+      $('#countMasuk').textContent = countIn;
+      $('#countKeluar').textContent = countOut;
+    }
+    function renderHistory() {
+      const term = $('#filterHistory').value?.toLowerCase() || '';
+      const tbody = $('#tblHistory'); tbody.innerHTML = '';
+      state.tx.slice().reverse().forEach(t => {
+        const line = `${t.time} ${t.type} ${t.artNo} ${t.desc} ${t.unit} ${t.qty} ${t.price}`.toLowerCase();
+        if (!line.includes(term)) return;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${t.time}</td><td>${t.type}</td><td>${t.artNo}</td><td>${t.desc}</td><td>${t.unit}</td><td>${t.qty}</td><td>${t.price?fmtIDR(t.price):'-'}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+    function refreshDashboard() {
+      // stats
+      $('#statTotalBarang').textContent = state.db.length;
+      $('#statTotalStok').textContent = state.db.reduce((a,b)=>a+(Number(b.sohQty)||0),0);
+      $('#statHampirHabis').textContent = state.db.filter(it => (Number(it.sohQty)||0) <= (Number(it.minStock)||0)).length;
+      // last tx
+      const tbody = $('#tblLastTx'); tbody.innerHTML = '';
+      state.tx.slice(-5).reverse().forEach(t => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${t.time}</td><td><span class="badge ${t.type==='Masuk'?'primary':'red'}">${t.type}</span></td><td>${t.artNo}</td><td>${t.desc}</td><td>${t.qty}</td>`;
+        tbody.appendChild(tr);
+      });
+      // chart
+      const labels = state.db.map(i => i.description);
+      const data = state.db.map(i => Number(i.sohQty)||0);
+      const ctx = $('#stokChart').getContext('2d');
+      if (window._stokChart) window._stokChart.destroy();
+      window._stokChart = new Chart(ctx, {
+        type: 'bar',
+        data: { labels, datasets: [{ label: 'Stok', data }]},
+        options: { responsive: true, plugins: { legend: { display: false } } }
+      });
+    }
+
+    // ===== Actions =====
+    function submitTx() {
+      const type = $('#f_type').value;
+      const artNo = $('#f_artNo').value.trim();
+      const desc  = $('#f_desc').value.trim();
+      const unit  = $('#f_unit').value.trim();
+      const price = $('#f_price').value ? Number($('#f_price').value) : null;
+      const qty   = Number($('#f_qty').value);
+      if (!artNo || !desc || !unit || !qty || qty <= 0) { alert('Lengkapi data transaksi.'); return; }
+      let it = findItem(artNo);
+      if (!it) {
+        it = { artNo, description: desc, dUnit: unit, actualPrice: Number(price)||0, sohQty: 0, reqQty: 0, minStock: 0, maxStock: 0, supplierName: '' };
+        state.db.push(it);
+      } else {
+        // sync changes
+        it.description = desc; it.dUnit = unit;
+        if (price != null) it.actualPrice = Number(price);
+      }
+      if (type === 'Masuk') {
+        it.sohQty = (Number(it.sohQty)||0) + qty;
+      } else {
+        const stok = (Number(it.sohQty)||0) - qty;
+        if (stok < 0) { alert('Stok tidak cukup!'); return; }
+        it.sohQty = stok;
+      }
+      state.tx.push({ time: new Date().toLocaleString('id-ID'), type, artNo, desc, unit, qty, price });
+      saveAll(); renderDL(); renderDB(); renderInOut(); renderHistory(); refreshDashboard();
+      $('#f_artNo').value = ''; $('#f_desc').value = ''; $('#f_unit').value=''; $('#f_price').value=''; $('#f_qty').value='';
+      alert('Transaksi disimpan.');
+    }
+
+    function exportAll() {
+      const payload = {
+        exportedAt: new Date().toISOString(),
+        users: state.users.map(u => ({username: u.username, role: u.role, passHash: u.passHash})),
+        db: state.db, tx: state.tx
+      };
+      const blob = new Blob([JSON.stringify(payload,null,2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'inventori_backup.json'; a.click();
+      setTimeout(()=>URL.revokeObjectURL(url), 1000);
+    }
+    function importAll(file) {
+      const r = new FileReader();
+      r.onload = async () => {
+        try {
+          const data = JSON.parse(r.result);
+          if (!data || !Array.isArray(data.db) || !Array.isArray(data.tx)) throw new Error('format');
+          state.db = data.db; state.tx = data.tx;
+          if (Array.isArray(data.users)) state.users = data.users;
+          saveAll(); renderDL(); renderDB(); renderInOut(); renderHistory(); refreshDashboard(); renderUsers();
+          alert('Import selesai.');
+        } catch(e) { alert('Gagal import: ' + e.message); }
+      };
+      r.readAsText(file);
+    }
+
+    // ===== Users (Admin) =====
+    function renderUsers() {
+      const tbody = $('#tblUsers'); tbody.innerHTML='';
+      state.users.forEach(u => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${u.username}</td><td>${u.role}</td>
+          <td><button class="btn btn-secondary btn-outline" data-action="del" data-username="${u.username}">Hapus</button></td>`;
+        tbody.appendChild(tr);
+      });
+      // actions
+      $$('#tblUsers [data-action="del"]').forEach(btn => {
+        btn.onclick = () => {
+          const uname = btn.getAttribute('data-username');
+          if (!confirm('Hapus user ' + uname + '?')) return;
+          state.users = state.users.filter(x=>x.username !== uname);
+          saveAll(); renderUsers();
+        };
+      });
+    }
+
+    async function addOrResetUser() {
+      const username = $('#u_username').value.trim();
+      const role = $('#u_role').value;
+      const pass = $('#u_password').value;
+      if (!username || !pass) { alert('Isi username dan password.'); return; }
+      const hash = await sha256(pass);
+      const i = state.users.findIndex(u => u.username === username);
+      if (i >= 0) { state.users[i].role = role; state.users[i].passHash = hash; }
+      else state.users.push({ username, role, passHash: hash });
+      saveAll(); renderUsers();
+      $('#u_username').value=''; $('#u_password').value='';
+      alert('User disimpan.');
+    }
+
+    // ===== Init =====
+    async function init() {
+      loadAll();
+      await ensureDefaultUsers();
+      if (state.session) {
+        // show app
+        $('#loginView').style.display = 'none';
+        $('#appView').style.display = 'block';
+        navApplyRole();
+        renderDL(); renderDB(); renderInOut(); renderHistory(); refreshDashboard();
+      } else {
+        $('#loginView').style.display = 'flex';
+        $('#appView').style.display = 'none';
+      }
+
+      // Events
+      $('#btnLogin').onclick = async () => {
+        const ok = await login($('#loginUsername').value.trim(), $('#loginPassword').value);
+        if (!ok) { alert('Login gagal.'); return; }
+        $('#loginView').style.display = 'none';
+        $('#appView').style.display = 'block';
+        navApplyRole(); renderDL(); renderDB(); renderInOut(); renderHistory(); refreshDashboard();
+      };
+      $('#btnLogout').onclick = logout;
+      $('#menu').addEventListener('click', (e) => {
+        const li = e.target.closest('li'); if (!li) return;
+        // role guard
+        const role = state.session?.role;
+        if (li.hasAttribute('data-role') && role !== 'admin') { alert('Akses khusus admin'); return; }
+        showPage(li.getAttribute('data-page'));
+      });
+      $('#btnSubmitTx').onclick = submitTx;
+      $('#filterMasuk').oninput = renderInOut;
+      $('#filterKeluar').oninput = renderInOut;
+      $('#filterDB').oninput = renderDB;
+      $('#filterHistory').oninput = renderHistory;
+      $('#btnNewItem').onclick = () => { showPage('form'); $('#f_artNo').focus(); };
+      $('#btnAddUser').onclick = addOrResetUser;
+      $('#btnExport').onclick = exportAll;
+      $('#fileImport').onchange = e => { const f=e.target.files[0]; if (f) importAll(f); };
+      $('#btnOpenSidebar').onclick = () => $('#sidebar').classList.toggle('open');
+      window.addEventListener('resize', () => $('#sidebar').classList.remove('open'));
+    }
+
+    init();
+  </script>
 </body>
 </html>
