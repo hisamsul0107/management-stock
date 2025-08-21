@@ -2,576 +2,285 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Inventory Management — Login & Roles</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    * { box-sizing: border-box; }
-    body { margin: 0; font-family: Arial, sans-serif; background: #f5f7fa; color: #2c3e50; }
-    /* Login */
-    .login-wrap {
-      min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
-    }
-    .login-card {
-      width: 100%; max-width: 420px; background: #fff; border-radius: 10px; box-shadow: 0 8px 30px rgba(0,0,0,.08);
-      padding: 24px;
-    }
-    .login-card h1 { margin: 0 0 6px; font-size: 22px; }
-    .muted { color: #6b7280; font-size: 13px; margin-bottom: 18px; }
-    .form-control { width: 100%; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 8px; margin-bottom: 10px; }
-    .btn { padding: 10px 14px; border: 1px solid transparent; border-radius: 8px; cursor: pointer; }
-    .btn-primary { background: #2563eb; color: #fff; }
-    .btn-secondary { background: #e5e7eb; color: #111827; }
-    .hint { background: #f3f4f6; padding: 10px; border-radius: 8px; font-size: 12px; margin-top: 8px; }
-    /* App layout */
-    .app { display: none; }
-    .sidebar {
-      width: 260px; background: #111827; color: #e5e7eb; position: fixed; inset: 0 auto 0 0; padding: 18px 14px; overflow-y: auto;
-    }
-    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 18px; margin-bottom: 16px; }
-    .brand small { font-weight: 500; color: #9ca3af; }
-    .user-box { background: #1f2937; padding: 10px; border-radius: 8px; margin-bottom: 14px; font-size: 13px; }
-    .menu { list-style: none; padding: 0; margin: 0; }
-    .menu li { padding: 10px 12px; border-radius: 8px; cursor: pointer; margin: 4px 0; }
-    .menu li:hover, .menu li.active { background: #374151; }
-    .menu li[hidden] { display: none !important; }
-    .sidebar .actions { display: flex; gap: 8px; margin-top: 12px; }
-    .main { margin-left: 260px; padding: 22px; }
-    h2 { margin: 0 0 12px; }
-    .card { background: #fff; border-radius: 10px; padding: 16px; box-shadow: 0 8px 30px rgba(0,0,0,.05); margin-bottom: 16px; }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { text-align: left; border-bottom: 1px solid #e5e7eb; padding: 10px; font-size: 14px; }
-    th { background: #f9fafb; }
-    tr.low-stock { background: #fff1f2; }
-    .grid { display: grid; gap: 12px; }
-    .grid.col2 { grid-template-columns: repeat(2, minmax(0,1fr)); }
-    .grid.col3 { grid-template-columns: repeat(3, minmax(0,1fr)); }
-    .grid.col4 { grid-template-columns: repeat(4, minmax(0,1fr)); }
-    .field { display: flex; flex-direction: column; gap: 6px; }
-    .field input, .field select { padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 8px; }
-    .toolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-    .toolbar .spacer { flex: 1; }
-    .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; background: #e5e7eb; }
-    .badge.primary { background: #dbeafe; color: #1d4ed8; }
-    .badge.red { background: #fee2e2; color: #991b1b; }
-    .btn-outline { background: transparent; border: 1px solid #d1d5db; }
-    .hidden { display: none !important; }
-    @media (max-width: 900px) {
-      .sidebar { position: fixed; transform: translateX(-100%); transition: transform .2s; z-index: 20; }
-      .sidebar.open { transform: translateX(0); }
-      .main { margin-left: 0; }
-      .show-on-mobile { display: inline-flex !important; }
-      .hide-on-mobile { display: none !important; }
-    }
-    .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-    .iconbtn { border: none; background: #111827; color: #fff; padding: 8px 10px; border-radius: 8px; cursor: pointer; display: none; }
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Inventory Management System</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {margin: 0; padding: 0; box-sizing: border-box;}
+        body {font-family: Arial, sans-serif; display: flex; background-color: #f5f7fa;}
+        /* Sidebar */
+        .sidebar {width: 250px; background-color: #2c3e50; height: 100vh; position: fixed; padding: 20px 0; color: #fff;}
+        .sidebar h2 {text-align: center; margin-bottom: 30px;}
+        .sidebar ul {list-style: none;}
+        .sidebar ul li {padding: 15px 20px; cursor: pointer; transition: background 0.3s;}
+        .sidebar ul li:hover, .sidebar ul li.active {background-color: #34495e;}
+        /* Main */
+        .main {margin-left: 250px; padding: 20px; width: calc(100% - 250px);}
+        .hidden {display: none;}
+        h2 {color: #2c3e50; margin-bottom: 15px;}
+        form input, form button, form select, form textarea {
+            padding: 10px; margin: 5px; border: 1px solid #ccc; border-radius: 4px;
+        }
+        form button {background-color: #3498db; color: white; cursor: pointer;}
+        table {width: 100%; border-collapse: collapse; margin-top: 15px;}
+        th, td {border: 1px solid #ddd; padding: 10px; text-align: center;}
+        th {background-color: #3498db; color: white;}
+        tr.low-stock {background-color: #ffe6e6;}
+        td[contenteditable="true"] {background-color: #fdfd96;}
+    </style>
 </head>
 <body>
-  <!-- LOGIN -->
-  <section class="login-wrap" id="loginView">
-    <div class="login-card">
-      <h1>Masuk ke Aplikasi Inventori</h1>
-      <div class="muted">Demo login (data tersimpan lokal & bukan untuk produksi).</div>
-      <input class="form-control" id="loginUsername" placeholder="Username" autocomplete="username" />
-      <input class="form-control" id="loginPassword" placeholder="Password" type="password" autocomplete="current-password" />
-      <button class="btn btn-primary" id="btnLogin">Masuk</button>
-      <div class="hint">
-        <strong>Demo akun:</strong><br>
-        Admin → <code>admin / admin123</code><br>
-        Staff → <code>staff / staff123</code>
-      </div>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h2>📦 Inventory</h2>
+        <ul>
+            <li class="active" onclick="showPage('dashboard')">Dashboard</li>
+            <li onclick="showPage('form')">Form Transaksi</li>
+            <li onclick="showPage('masuk')">Data Masuk</li>
+            <li onclick="showPage('keluar')">Data Keluar</li>
+            <li onclick="showPage('database')">Database Barang</li>
+            <li onclick="showPage('riwayat')">Riwayat Transaksi</li>
+        </ul>
     </div>
-  </section>
 
-  <!-- APP -->
-  <section class="app" id="appView">
-    <aside class="sidebar" id="sidebar">
-      <div class="brand">📦 Inventori <small id="appVersion">v1.0</small></div>
-      <div class="user-box">
-        Masuk sebagai: <strong id="uName">-</strong><br>
-        Peran: <span class="badge primary" id="uRole">-</span>
-      </div>
-      <ul class="menu" id="menu">
-        <li data-page="dashboard" class="active">Dashboard</li>
-        <li data-page="form">Form Transaksi</li>
-        <li data-page="masuk">Data Masuk</li>
-        <li data-page="keluar">Data Keluar</li>
-        <li data-page="database" data-role="admin">Database Barang</li>
-        <li data-page="riwayat" data-role="admin">Riwayat Transaksi</li>
-        <li data-page="users" data-role="admin">Pengguna & Roles</li>
-      </ul>
-      <div class="actions">
-        <button class="btn btn-secondary btn-outline" id="btnExport" data-role="admin">Export</button>
-        <label class="btn btn-secondary btn-outline" data-role="admin">
-          Import <input type="file" id="fileImport" accept="application/json" hidden />
-        </label>
-        <button class="btn btn-secondary btn-outline" id="btnLogout">Keluar</button>
-      </div>
-    </aside>
-
-    <main class="main">
-      <div class="topbar">
-        <button class="iconbtn show-on-mobile" id="btnOpenSidebar">☰ Menu</button>
-        <div></div>
-      </div>
-
-      <!-- DASHBOARD -->
-      <section id="page-dashboard" class="card">
-        <h2>Dashboard</h2>
-        <div class="grid col3">
-          <div class="card">
-            <div>Total Barang</div>
-            <div id="statTotalBarang" style="font-size:24px;font-weight:700">0</div>
-          </div>
-          <div class="card">
-            <div>Total Stok</div>
-            <div id="statTotalStok" style="font-size:24px;font-weight:700">0</div>
-          </div>
-          <div class="card">
-            <div>Hampir Habis</div>
-            <div id="statHampirHabis" style="font-size:24px;font-weight:700">0</div>
-          </div>
+    <!-- Main -->
+    <div class="main">
+        <!-- Dashboard -->
+        <div id="dashboard">
+            <h2>Dashboard</h2>
+            <p>Total Barang: <span id="totalBarang">0</span></p>
+            <p>Total Stok: <span id="totalStok">0</span></p>
+            <canvas id="stokChart"></canvas>
         </div>
-        <canvas id="stokChart" height="120"></canvas>
-        <div class="card">
-          <h3 style="margin-bottom:8px;">Transaksi Terakhir</h3>
-          <table>
-            <thead><tr><th>Waktu</th><th>Jenis</th><th>Art.No</th><th>Nama</th><th>Qty</th></tr></thead>
-            <tbody id="tblLastTx"></tbody>
-          </table>
+
+        <!-- Form Transaksi -->
+        <div id="form" class="hidden">
+            <h2>Form Transaksi</h2>
+            <form id="transactionForm">
+                <input type="text" id="kode" placeholder="Kode Barang" required />
+                <input type="text" id="nama" placeholder="Nama Barang" required />
+                <input type="text" id="unit" placeholder="Unit" required />
+                <input type="number" id="qty" placeholder="Qty" required />
+                <input type="text" id="store" placeholder="Store" required />
+                <input type="text" id="keterangan" placeholder="Keterangan" />
+                <input type="text" id="receiving" placeholder="No Receiving (opsional)" />
+                <button type="button" onclick="addItem(true)">➕ Masuk</button>
+                <button type="button" onclick="addItem(false)">➖ Keluar</button>
+            </form>
+            <h3>Riwayat Stok Barang</h3>
+            <table id="riwayatStok">
+                <thead>
+                    <tr><th>Kode</th><th>Nama</th><th>Qty</th><th>Unit</th><th>Tanggal/Jam</th><th>Store</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
         </div>
-      </section>
 
-      <!-- FORM TRANSAKSI -->
-      <section id="page-form" class="card hidden">
-        <h2>Form Transaksi</h2>
-        <div class="grid col4">
-          <div class="field"><label>Art. No</label><input id="f_artNo" placeholder="ART-001" list="dlArt"/></div>
-          <div class="field"><label>Description</label><input id="f_desc" placeholder="Nama barang"/></div>
-          <div class="field"><label>D-Unit</label><input id="f_unit" placeholder="pcs/box/kg"/></div>
-          <div class="field"><label>Actual Price</label><input id="f_price" type="number" min="0" step="0.01" placeholder="0"/></div>
-          <div class="field"><label>Qty</label><input id="f_qty" type="number" min="1" step="1" placeholder="1"/></div>
-          <div class="field"><label>Jenis</label>
-            <select id="f_type"><option>Masuk</option><option>Keluar</option></select></div>
-          <div class="field"><label>&nbsp;</label><button class="btn btn-primary" id="btnSubmitTx">Simpan</button></div>
+        <!-- Data Masuk -->
+        <div id="masuk" class="hidden">
+            <h2>Data Barang Masuk</h2>
+            <table id="tableMasuk">
+                <thead><tr><th>Tanggal</th><th>Kode</th><th>Nama</th><th>Qty</th><th>Store</th></tr></thead>
+                <tbody></tbody>
+            </table>
         </div>
-        <datalist id="dlArt"></datalist>
-        <div class="hint" style="margin-top:10px;">Tips: mengisi harga akan memperbarui <em>Actual Price</em> item.</div>
-      </section>
 
-      <!-- DATA MASUK -->
-      <section id="page-masuk" class="card hidden">
-        <h2>Data Masuk</h2>
-        <div class="toolbar">
-          <input class="form-control" id="filterMasuk" placeholder="Cari..." />
-          <div class="spacer"></div>
-          <span class="badge">Total: <span id="countMasuk">0</span></span>
+        <!-- Data Keluar -->
+        <div id="keluar" class="hidden">
+            <h2>Data Barang Keluar</h2>
+            <table id="tableKeluar">
+                <thead><tr><th>Tanggal</th><th>Kode</th><th>Nama</th><th>Qty</th><th>Store</th></tr></thead>
+                <tbody></tbody>
+            </table>
         </div>
-        <table>
-          <thead><tr><th>Waktu</th><th>Art.No</th><th>Nama</th><th>Unit</th><th>Qty</th><th>Harga</th></tr></thead>
-          <tbody id="tblMasuk"></tbody>
-        </table>
-      </section>
 
-      <!-- DATA KELUAR -->
-      <section id="page-keluar" class="card hidden">
-        <h2>Data Keluar</h2>
-        <div class="toolbar">
-          <input class="form-control" id="filterKeluar" placeholder="Cari..." />
-          <div class="spacer"></div>
-          <span class="badge">Total: <span id="countKeluar">0</span></span>
+        <!-- Database -->
+        <div id="database" class="hidden">
+            <h2>Database Barang</h2>
+            <table id="inventoryTable">
+                <thead>
+                    <tr>
+                        <th>Kode</th>
+                        <th>Nama Barang</th>
+                        <th>D-Unit</th>
+                        <th>Actual Price</th>
+                        <th>SOH QTY</th>
+                        <th>Amount (SOH)</th>
+                        <th>Req QTY</th>
+                        <th>Amount (Req)</th>
+                        <th>Min Stock</th>
+                        <th>Max Stock</th>
+                        <th>Supplier</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
         </div>
-        <table>
-          <thead><tr><th>Waktu</th><th>Art.No</th><th>Nama</th><th>Unit</th><th>Qty</th><th>Harga</th></tr></thead>
-          <tbody id="tblKeluar"></tbody>
-        </table>
-      </section>
 
-      <!-- DATABASE -->
-      <section id="page-database" class="card hidden">
-        <h2>Database Barang</h2>
-        <div class="toolbar">
-          <input class="form-control" id="filterDB" placeholder="Cari kode/nama/supplier..." />
-          <div class="spacer"></div>
-          <button class="btn btn-secondary btn-outline" id="btnNewItem">Item Baru</button>
+        <!-- Riwayat -->
+        <div id="riwayat" class="hidden">
+            <h2>Riwayat Transaksi</h2>
+            <table id="tableRiwayat">
+                <thead>
+                    <tr><th>Tanggal</th><th>Jenis</th><th>Kode</th><th>Nama</th><th>Qty</th><th>Unit</th><th>Store</th><th>Keterangan</th><th>No Receiving</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
         </div>
-        <table>
-          <thead>
-            <tr>
-              <th>Art. No</th><th>Description</th><th>D-Unit</th><th>Actual Price</th>
-              <th>SOH QTY</th><th>Actual Amount (SOH)</th><th>Req QTY</th><th>Actual Amount (Request)</th>
-              <th>Min Stock</th><th>Max Stock</th><th>Supplier</th>
-            </tr>
-          </thead>
-          <tbody id="tblDB"></tbody>
-        </table>
-      </section>
+    </div>
 
-      <!-- RIWAYAT -->
-      <section id="page-riwayat" class="card hidden">
-        <h2>Riwayat Transaksi</h2>
-        <div class="toolbar">
-          <input class="form-control" id="filterHistory" placeholder="Cari..." />
-        </div>
-        <table>
-          <thead><tr><th>Waktu</th><th>Jenis</th><th>Art.No</th><th>Nama</th><th>Unit</th><th>Qty</th><th>Harga</th></tr></thead>
-          <tbody id="tblHistory"></tbody>
-        </table>
-      </section>
+    <script>
+        let inventory = JSON.parse(localStorage.getItem("inventory")) || [];
+        let transaksiMasuk = JSON.parse(localStorage.getItem("masuk")) || [];
+        let transaksiKeluar = JSON.parse(localStorage.getItem("keluar")) || [];
+        let riwayat = JSON.parse(localStorage.getItem("riwayat")) || [];
 
-      <!-- USERS & ROLES (Admin) -->
-      <section id="page-users" class="card hidden">
-        <h2>Pengguna & Roles</h2>
-        <div class="grid col3">
-          <div class="field"><label>Username</label><input id="u_username" /></div>
-          <div class="field"><label>Peran</label>
-            <select id="u_role"><option value="staff">staff</option><option value="admin">admin</option></select></div>
-          <div class="field"><label>Password</label><input id="u_password" type="password" /></div>
-          <div class="field"><label>&nbsp;</label><button class="btn btn-primary" id="btnAddUser">Tambah / Reset</button></div>
-        </div>
-        <table style="margin-top:10px">
-          <thead><tr><th>Username</th><th>Role</th><th>Aksi</th></tr></thead>
-          <tbody id="tblUsers"></tbody>
-        </table>
-        <div class="hint" style="margin-top:8px;">
-          Catatan: kredensial disimpan di browser (localStorage) sebagai hash. Jangan gunakan untuk produksi.
-        </div>
-      </section>
+        function saveData() {
+            localStorage.setItem("inventory", JSON.stringify(inventory));
+            localStorage.setItem("masuk", JSON.stringify(transaksiMasuk));
+            localStorage.setItem("keluar", JSON.stringify(transaksiKeluar));
+            localStorage.setItem("riwayat", JSON.stringify(riwayat));
+        }
 
-    </main>
-  </section>
+        function renderTable() {
+            const tbody = document.querySelector("#inventoryTable tbody");
+            tbody.innerHTML = "";
+            inventory.forEach(item => {
+                const row = document.createElement("tr");
+                if (item.soh <= 5) row.classList.add("low-stock");
+                row.innerHTML = `
+                    <td>${item.kode}</td>
+                    <td contenteditable="true" oninput="editItem('${item.kode}', 'nama', this.innerText)">${item.nama}</td>
+                    <td contenteditable="true" oninput="editItem('${item.kode}', 'unit', this.innerText)">${item.unit}</td>
+                    <td contenteditable="true" oninput="editItem('${item.kode}', 'price', this.innerText)">${item.price || ''}</td>
+                    <td>${item.soh}</td>
+                    <td>${(item.soh * (item.price || 0)).toFixed(2)}</td>
+                    <td contenteditable="true" oninput="editItem('${item.kode}', 'reqQty', this.innerText)">${item.reqQty || ''}</td>
+                    <td contenteditable="true" oninput="editItem('${item.kode}', 'reqAmt', this.innerText)">${item.reqAmt || ''}</td>
+                    <td contenteditable="true" oninput="editItem('${item.kode}', 'minStock', this.innerText)">${item.minStock || ''}</td>
+                    <td contenteditable="true" oninput="editItem('${item.kode}', 'maxStock', this.innerText)">${item.maxStock || ''}</td>
+                    <td contenteditable="true" oninput="editItem('${item.kode}', 'supplier', this.innerText)">${item.supplier || ''}</td>
+                `;
+                tbody.appendChild(row);
+            });
+            updateDashboard();
+        }
 
-  <script>
-    // ===== Utilities & Storage =====
-    const KEYS = {
-      USERS: 'inv_users_v1',
-      SESSION: 'inv_session_v1',
-      DB: 'inv_db_v1',
-      TX: 'inv_tx_v1'
-    };
+        function editItem(kode, field, value) {
+            const item = inventory.find(i => i.kode === kode);
+            if (item) {
+                item[field] = isNaN(value) ? value : parseFloat(value);
+                saveData();
+                renderTable();
+            }
+        }
 
-    const state = {
-      users: [], // {username, role, passHash}
-      session: null, // {username, role}
-      db: [], // master items
-      tx: []  // transactions
-    };
+        function renderMasukKeluar() {
+            const masukTbody = document.querySelector("#tableMasuk tbody");
+            masukTbody.innerHTML = "";
+            transaksiMasuk.forEach(tr => {
+                const row = `<tr><td>${tr.tanggal}</td><td>${tr.kode}</td><td>${tr.nama}</td><td>${tr.qty}</td><td>${tr.store}</td></tr>`;
+                masukTbody.innerHTML += row;
+            });
 
-    const fmtIDR = n => (n ?? 0).toLocaleString('id-ID', { style: 'currency', currency: 'IDR' });
-    const $ = (sel, el=document) => el.querySelector(sel);
-    const $$ = (sel, el=document) => [...el.querySelectorAll(sel)];
+            const keluarTbody = document.querySelector("#tableKeluar tbody");
+            keluarTbody.innerHTML = "";
+            transaksiKeluar.forEach(tr => {
+                const row = `<tr><td>${tr.tanggal}</td><td>${tr.kode}</td><td>${tr.nama}</td><td>${tr.qty}</td><td>${tr.store}</td></tr>`;
+                keluarTbody.innerHTML += row;
+            });
+        }
 
-    function saveAll() {
-      localStorage.setItem(KEYS.USERS, JSON.stringify(state.users));
-      localStorage.setItem(KEYS.SESSION, JSON.stringify(state.session));
-      localStorage.setItem(KEYS.DB, JSON.stringify(state.db));
-      localStorage.setItem(KEYS.TX, JSON.stringify(state.tx));
-    }
-    function loadAll() {
-      state.users = JSON.parse(localStorage.getItem(KEYS.USERS) || '[]');
-      state.session = JSON.parse(localStorage.getItem(KEYS.SESSION) || 'null');
-      state.db = JSON.parse(localStorage.getItem(KEYS.DB) || '[]');
-      state.tx = JSON.parse(localStorage.getItem(KEYS.TX) || '[]');
-    }
+        function renderRiwayat() {
+            const tbody = document.querySelector("#tableRiwayat tbody");
+            tbody.innerHTML = "";
+            riwayat.forEach(tr => {
+                const row = `<tr>
+                    <td>${tr.tanggal}</td><td>${tr.jenis}</td><td>${tr.kode}</td><td>${tr.nama}</td>
+                    <td>${tr.qty}</td><td>${tr.unit}</td><td>${tr.store}</td>
+                    <td>${tr.keterangan}</td><td>${tr.receiving}</td></tr>`;
+                tbody.innerHTML += row;
+            });
+        }
 
-    // SHA-256 hash using Web Crypto
-    async function sha256(str) {
-      const enc = new TextEncoder().encode(str);
-      const buf = await crypto.subtle.digest('SHA-256', enc);
-      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
-    }
+        function addItem(isIn) {
+            const kode = document.getElementById("kode").value.trim();
+            const nama = document.getElementById("nama").value.trim();
+            const unit = document.getElementById("unit").value.trim();
+            const qty = parseInt(document.getElementById("qty").value);
+            const store = document.getElementById("store").value.trim();
+            const keterangan = document.getElementById("keterangan").value.trim();
+            const receiving = document.getElementById("receiving").value.trim();
 
-    async function ensureDefaultUsers() {
-      if (state.users.length === 0) {
-        state.users = [
-          { username: 'admin', role: 'admin', passHash: await sha256('admin123') },
-          { username: 'staff', role: 'staff', passHash: await sha256('staff123') }
-        ];
-        saveAll();
-      }
-    }
+            if (!kode || !nama || !unit || isNaN(qty) || !store) {
+                alert("Lengkapi semua data!");
+                return;
+            }
 
-    // ===== Auth =====
-    async function login(username, password) {
-      const user = state.users.find(u => u.username === username);
-      if (!user) return false;
-      const passHash = await sha256(password);
-      if (passHash !== user.passHash) return false;
-      state.session = { username: user.username, role: user.role };
-      saveAll();
-      return true;
-    }
-    function logout() {
-      state.session = null; saveAll(); location.reload();
-    }
+            let item = inventory.find(i => i.kode === kode);
+            if (!item) {
+                item = { kode, nama, unit, soh: 0 };
+                inventory.push(item);
+            }
 
-    // ===== Menus & Navigation =====
-    function navApplyRole() {
-      const role = state.session?.role;
-      $('#uName').textContent = state.session?.username || '-';
-      $('#uRole').textContent = role || '-';
-      // hide menu items requiring admin
-      $$('#menu [data-role="admin"]').forEach(li => {
-        li.hidden = (role !== 'admin');
-      });
-      // hide export/import for non-admin
-      $$('.actions [data-role="admin"]').forEach(btn => btn.hidden = (role !== 'admin'));
-    }
-    function showPage(name) {
-      $$('.menu li').forEach(li => li.classList.remove('active'));
-      const targetLi = $(`.menu li[data-page="${name}"]`);
-      if (targetLi) targetLi.classList.add('active');
-      $$('main section').forEach(sec => sec.classList.add('hidden'));
-      const sec = $(`#page-${name}`);
-      if (sec) sec.classList.remove('hidden');
-      if (name === 'dashboard') refreshDashboard();
-      if (name === 'database') renderDB();
-      if (name === 'masuk' || name === 'keluar') renderInOut();
-      if (name === 'riwayat') renderHistory();
-      if (name === 'users') renderUsers();
-      // close sidebar on mobile
-      $('#sidebar').classList.remove('open');
-    }
+            const tanggal = new Date().toLocaleString();
+            if (isIn) {
+                item.soh += qty;
+                transaksiMasuk.push({ tanggal, kode, nama, qty, store });
+                riwayat.push({ tanggal, jenis: "Masuk", kode, nama, qty, unit, store, keterangan, receiving });
+            } else {
+                if (item.soh < qty) return alert("Stok tidak cukup!");
+                item.soh -= qty;
+                transaksiKeluar.push({ tanggal, kode, nama, qty, store });
+                riwayat.push({ tanggal, jenis: "Keluar", kode, nama, qty, unit, store, keterangan, receiving });
+            }
 
-    // ===== Data helpers =====
-    function findItem(artNo) { return state.db.find(x => x.artNo === artNo); }
-    function upsertItem(item) {
-      const i = state.db.findIndex(x => x.artNo === item.artNo);
-      if (i >= 0) state.db[i] = item; else state.db.push(item);
-    }
-    function computeAmounts(it) {
-      const price = Number(it.actualPrice) || 0;
-      const soh = Number(it.sohQty) || 0;
-      const req = Number(it.reqQty) || 0;
-      return { amtSOH: price * soh, amtReq: price * req };
-    }
+            saveData();
+            renderTable();
+            renderMasukKeluar();
+            renderRiwayat();
+            renderRiwayatStok(kode);
+            document.getElementById("transactionForm").reset();
+        }
 
-    // ===== Rendering =====
-    function renderDL() {
-      $('#dlArt').innerHTML = state.db.map(it => `<option value="${it.artNo}">${it.description}</option>`).join('');
-    }
-    function renderDB() {
-      const term = $('#filterDB').value?.toLowerCase() || '';
-      const tbody = $('#tblDB'); tbody.innerHTML = '';
-      state.db
-        .filter(it => (it.artNo+it.description+(it.supplierName||'')).toLowerCase().includes(term))
-        .forEach(it => {
-          const { amtSOH, amtReq } = computeAmounts(it);
-          const tr = document.createElement('tr');
-          if ((Number(it.sohQty)||0) <= (Number(it.minStock)||0)) tr.classList.add('low-stock');
-          tr.innerHTML = `
-            <td>${it.artNo}</td>
-            <td>${it.description}</td>
-            <td>${it.dUnit}</td>
-            <td>${fmtIDR(Number(it.actualPrice)||0)}</td>
-            <td>${Number(it.sohQty)||0}</td>
-            <td>${fmtIDR(amtSOH)}</td>
-            <td>${Number(it.reqQty)||0}</td>
-            <td>${fmtIDR(amtReq)}</td>
-            <td>${Number(it.minStock)||0}</td>
-            <td>${Number(it.maxStock)||0}</td>
-            <td>${it.supplierName||''}</td>
-          `;
-          tbody.appendChild(tr);
-        });
-    }
-    function renderInOut() {
-      const masukTbody = $('#tblMasuk'); masukTbody.innerHTML = '';
-      const keluarTbody = $('#tblKeluar'); keluarTbody.innerHTML = '';
-      const filterIn = $('#filterMasuk').value?.toLowerCase() || '';
-      const filterOut = $('#filterKeluar').value?.toLowerCase() || '';
-      let countIn=0, countOut=0;
-      state.tx.filter(t => t.type === 'Masuk').forEach(t => {
-        const line = `${t.time} ${t.artNo} ${t.desc} ${t.unit} ${t.qty} ${t.price}`.toLowerCase();
-        if (!line.includes(filterIn)) return;
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${t.time}</td><td>${t.artNo}</td><td>${t.desc}</td><td>${t.unit}</td><td>${t.qty}</td><td>${t.price?fmtIDR(t.price):'-'}</td>`;
-        masukTbody.appendChild(tr); countIn++;
-      });
-      state.tx.filter(t => t.type === 'Keluar').forEach(t => {
-        const line = `${t.time} ${t.artNo} ${t.desc} ${t.unit} ${t.qty} ${t.price}`.toLowerCase();
-        if (!line.includes(filterOut)) return;
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${t.time}</td><td>${t.artNo}</td><td>${t.desc}</td><td>${t.unit}</td><td>${t.qty}</td><td>${t.price?fmtIDR(t.price):'-'}</td>`;
-        keluarTbody.appendChild(tr); countOut++;
-      });
-      $('#countMasuk').textContent = countIn;
-      $('#countKeluar').textContent = countOut;
-    }
-    function renderHistory() {
-      const term = $('#filterHistory').value?.toLowerCase() || '';
-      const tbody = $('#tblHistory'); tbody.innerHTML = '';
-      state.tx.slice().reverse().forEach(t => {
-        const line = `${t.time} ${t.type} ${t.artNo} ${t.desc} ${t.unit} ${t.qty} ${t.price}`.toLowerCase();
-        if (!line.includes(term)) return;
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${t.time}</td><td>${t.type}</td><td>${t.artNo}</td><td>${t.desc}</td><td>${t.unit}</td><td>${t.qty}</td><td>${t.price?fmtIDR(t.price):'-'}</td>`;
-        tbody.appendChild(tr);
-      });
-    }
-    function refreshDashboard() {
-      // stats
-      $('#statTotalBarang').textContent = state.db.length;
-      $('#statTotalStok').textContent = state.db.reduce((a,b)=>a+(Number(b.sohQty)||0),0);
-      $('#statHampirHabis').textContent = state.db.filter(it => (Number(it.sohQty)||0) <= (Number(it.minStock)||0)).length;
-      // last tx
-      const tbody = $('#tblLastTx'); tbody.innerHTML = '';
-      state.tx.slice(-5).reverse().forEach(t => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${t.time}</td><td><span class="badge ${t.type==='Masuk'?'primary':'red'}">${t.type}</span></td><td>${t.artNo}</td><td>${t.desc}</td><td>${t.qty}</td>`;
-        tbody.appendChild(tr);
-      });
-      // chart
-      const labels = state.db.map(i => i.description);
-      const data = state.db.map(i => Number(i.sohQty)||0);
-      const ctx = $('#stokChart').getContext('2d');
-      if (window._stokChart) window._stokChart.destroy();
-      window._stokChart = new Chart(ctx, {
-        type: 'bar',
-        data: { labels, datasets: [{ label: 'Stok', data }]},
-        options: { responsive: true, plugins: { legend: { display: false } } }
-      });
-    }
+        function renderRiwayatStok(kode) {
+            const tbody = document.querySelector("#riwayatStok tbody");
+            tbody.innerHTML = "";
+            const riwayatBarang = riwayat.filter(r => r.kode === kode);
+            riwayatBarang.forEach(r => {
+                tbody.innerHTML += `<tr><td>${r.kode}</td><td>${r.nama}</td><td>${r.qty}</td><td>${r.unit}</td><td>${r.tanggal}</td><td>${r.store}</td></tr>`;
+            });
+        }
 
-    // ===== Actions =====
-    function submitTx() {
-      const type = $('#f_type').value;
-      const artNo = $('#f_artNo').value.trim();
-      const desc  = $('#f_desc').value.trim();
-      const unit  = $('#f_unit').value.trim();
-      const price = $('#f_price').value ? Number($('#f_price').value) : null;
-      const qty   = Number($('#f_qty').value);
-      if (!artNo || !desc || !unit || !qty || qty <= 0) { alert('Lengkapi data transaksi.'); return; }
-      let it = findItem(artNo);
-      if (!it) {
-        it = { artNo, description: desc, dUnit: unit, actualPrice: Number(price)||0, sohQty: 0, reqQty: 0, minStock: 0, maxStock: 0, supplierName: '' };
-        state.db.push(it);
-      } else {
-        // sync changes
-        it.description = desc; it.dUnit = unit;
-        if (price != null) it.actualPrice = Number(price);
-      }
-      if (type === 'Masuk') {
-        it.sohQty = (Number(it.sohQty)||0) + qty;
-      } else {
-        const stok = (Number(it.sohQty)||0) - qty;
-        if (stok < 0) { alert('Stok tidak cukup!'); return; }
-        it.sohQty = stok;
-      }
-      state.tx.push({ time: new Date().toLocaleString('id-ID'), type, artNo, desc, unit, qty, price });
-      saveAll(); renderDL(); renderDB(); renderInOut(); renderHistory(); refreshDashboard();
-      $('#f_artNo').value = ''; $('#f_desc').value = ''; $('#f_unit').value=''; $('#f_price').value=''; $('#f_qty').value='';
-      alert('Transaksi disimpan.');
-    }
+        function updateDashboard() {
+            document.getElementById("totalBarang").innerText = inventory.length;
+            document.getElementById("totalStok").innerText = inventory.reduce((a, b) => a + b.soh, 0);
 
-    function exportAll() {
-      const payload = {
-        exportedAt: new Date().toISOString(),
-        users: state.users.map(u => ({username: u.username, role: u.role, passHash: u.passHash})),
-        db: state.db, tx: state.tx
-      };
-      const blob = new Blob([JSON.stringify(payload,null,2)], {type:'application/json'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = 'inventori_backup.json'; a.click();
-      setTimeout(()=>URL.revokeObjectURL(url), 1000);
-    }
-    function importAll(file) {
-      const r = new FileReader();
-      r.onload = async () => {
-        try {
-          const data = JSON.parse(r.result);
-          if (!data || !Array.isArray(data.db) || !Array.isArray(data.tx)) throw new Error('format');
-          state.db = data.db; state.tx = data.tx;
-          if (Array.isArray(data.users)) state.users = data.users;
-          saveAll(); renderDL(); renderDB(); renderInOut(); renderHistory(); refreshDashboard(); renderUsers();
-          alert('Import selesai.');
-        } catch(e) { alert('Gagal import: ' + e.message); }
-      };
-      r.readAsText(file);
-    }
+            const ctx = document.getElementById("stokChart").getContext("2d");
+            new Chart(ctx, {
+                type: "bar",
+                data: {
+                    labels: inventory.map(i => i.nama),
+                    datasets: [{
+                        label: "Stok Barang",
+                        data: inventory.map(i => i.soh),
+                        backgroundColor: "#3498db"
+                    }]
+                }
+            });
+        }
 
-    // ===== Users (Admin) =====
-    function renderUsers() {
-      const tbody = $('#tblUsers'); tbody.innerHTML='';
-      state.users.forEach(u => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${u.username}</td><td>${u.role}</td>
-          <td><button class="btn btn-secondary btn-outline" data-action="del" data-username="${u.username}">Hapus</button></td>`;
-        tbody.appendChild(tr);
-      });
-      // actions
-      $$('#tblUsers [data-action="del"]').forEach(btn => {
-        btn.onclick = () => {
-          const uname = btn.getAttribute('data-username');
-          if (!confirm('Hapus user ' + uname + '?')) return;
-          state.users = state.users.filter(x=>x.username !== uname);
-          saveAll(); renderUsers();
-        };
-      });
-    }
+        function showPage(id) {
+            document.querySelectorAll(".main > div").forEach(div => div.classList.add("hidden"));
+            document.getElementById(id).classList.remove("hidden");
+            document.querySelectorAll(".sidebar ul li").forEach(li => li.classList.remove("active"));
+            event.target.classList.add("active");
+        }
 
-    async function addOrResetUser() {
-      const username = $('#u_username').value.trim();
-      const role = $('#u_role').value;
-      const pass = $('#u_password').value;
-      if (!username || !pass) { alert('Isi username dan password.'); return; }
-      const hash = await sha256(pass);
-      const i = state.users.findIndex(u => u.username === username);
-      if (i >= 0) { state.users[i].role = role; state.users[i].passHash = hash; }
-      else state.users.push({ username, role, passHash: hash });
-      saveAll(); renderUsers();
-      $('#u_username').value=''; $('#u_password').value='';
-      alert('User disimpan.');
-    }
-
-    // ===== Init =====
-    async function init() {
-      loadAll();
-      await ensureDefaultUsers();
-      if (state.session) {
-        // show app
-        $('#loginView').style.display = 'none';
-        $('#appView').style.display = 'block';
-        navApplyRole();
-        renderDL(); renderDB(); renderInOut(); renderHistory(); refreshDashboard();
-      } else {
-        $('#loginView').style.display = 'flex';
-        $('#appView').style.display = 'none';
-      }
-
-      // Events
-      $('#btnLogin').onclick = async () => {
-        const ok = await login($('#loginUsername').value.trim(), $('#loginPassword').value);
-        if (!ok) { alert('Login gagal.'); return; }
-        $('#loginView').style.display = 'none';
-        $('#appView').style.display = 'block';
-        navApplyRole(); renderDL(); renderDB(); renderInOut(); renderHistory(); refreshDashboard();
-      };
-      $('#btnLogout').onclick = logout;
-      $('#menu').addEventListener('click', (e) => {
-        const li = e.target.closest('li'); if (!li) return;
-        // role guard
-        const role = state.session?.role;
-        if (li.hasAttribute('data-role') && role !== 'admin') { alert('Akses khusus admin'); return; }
-        showPage(li.getAttribute('data-page'));
-      });
-      $('#btnSubmitTx').onclick = submitTx;
-      $('#filterMasuk').oninput = renderInOut;
-      $('#filterKeluar').oninput = renderInOut;
-      $('#filterDB').oninput = renderDB;
-      $('#filterHistory').oninput = renderHistory;
-      $('#btnNewItem').onclick = () => { showPage('form'); $('#f_artNo').focus(); };
-      $('#btnAddUser').onclick = addOrResetUser;
-      $('#btnExport').onclick = exportAll;
-      $('#fileImport').onchange = e => { const f=e.target.files[0]; if (f) importAll(f); };
-      $('#btnOpenSidebar').onclick = () => $('#sidebar').classList.toggle('open');
-      window.addEventListener('resize', () => $('#sidebar').classList.remove('open'));
-    }
-
-    init();
-  </script>
+        renderTable();
+        renderMasukKeluar();
+        renderRiwayat();
+    </script>
 </body>
 </html>
