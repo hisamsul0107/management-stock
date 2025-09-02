@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Warehouse Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for uniqueness */
+        .nav-link { transition: all 0.3s ease; }
+        .nav-link:hover { transform: scale(1.05); }
+        .fade-in { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <header class="bg-blue-600 text-white p-4 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold">WMS - Warehouse Management System</h1>
+            <nav class="hidden md:flex space-x-4">
+                <button class="nav-link" onclick="showSection('dashboard')">Dashboard</button>
+                <button class="nav-link" onclick="showSection('products')">Products</button>
+                <button class="nav-link" onclick="showSection('inventory')">Inventory</button>
+                <button class="nav-link" onclick="showSection('inbound')">Inbound</button>
+                <button class="nav-link" onclick="showSection('outbound')">Outbound</button>
+                <button class="nav-link" onclick="showSection('locations')">Locations</button>
+                <button class="nav-link" onclick="showSection('users')">Users</button>
+                <button class="nav-link" onclick="showSection('reports')">Reports</button>
+                <button class="nav-link" onclick="showSection('barcode')">Barcode</button>
+                <button class="nav-link" onclick="showSection('notifications')">Notifications</button>
+                <button class="nav-link" onclick="showSection('audit')">Audit Trail</button>
+                <button class="nav-link" onclick="showSection('multiwarehouse')">Multi-Warehouse</button>
+            </nav>
+            <button class="md:hidden" onclick="toggleMobileMenu()">Menu</button>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden mt-2">
+            <button class="block nav-link text-left w-full" onclick="showSection('dashboard')">Dashboard</button>
+            <button class="block nav-link text-left w-full" onclick="showSection('products')">Products</button>
+            <button class="block nav-link text-left w-full" onclick="showSection('inventory')">Inventory</button>
+            <button class="block nav-link text-left w-full" onclick="showSection('inbound')">Inbound</button>
+            <button class="block nav-link text-left w-full" onclick="showSection('outbound')">Outbound</button>
+            <button class="block nav-link text-left w-full" onclick="showSection('locations')">Locations</button>
+            <button class="block nav-link text-left w-full" onclick="showSection('users')">Users</button>
+            <button class="block nav-link text-left w-full" onclick="showSection('reports')">Reports</button>
+            <button class="block nav-link text-left w-full" onclick="showSection('barcode')">Barcode</button>
+            <button class="block nav-link text-left w-full" onclick="showSection('notifications')">Notifications</button>
+            <button class="block nav-link text-left w-full" onclick="showSection('audit')">Audit Trail</button>
+            <button class="block nav-link text-left w-full" onclick="showSection('multiwarehouse')">Multi-Warehouse</button>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-6">
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="section">
+            <h2 class="text-3xl font-bold mb-4">Dashboard Overview</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-white p-4 rounded shadow-md">
+                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/5f286251-2cd7-4609-99f3-f5796f6a9728.png" alt="Warehouse inventory overview with shelves stocked with various products like boxes, electronics, and machinery in a modern industrial setting" class="w-full h-32 object-cover mb-2" />
+                    <h3>Total Stock</h3>
+                    <p id="totalStock">Loading...</p>
+                </div>
+                <div class="bg-white p-4 rounded shadow-md">
+                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/92c4f5d1-4761-4b39-bf9e-fbdb5a18f86d.png" alt="Recent activities in warehouse showing staff handling packaged goods and digital screens displaying shipment logs" class="w-full h-32 object-cover mb-2" />
+                    <h3>Recent Activities</h3>
+                    <ul id="recentActivities"></ul>
+                </div>
+                <div class="bg-white p-4 rounded shadow-md">
+                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/b95ecc9e-920e-44ee-8b4f-500141844bc6.png" alt="Alert notifications with icons of warning signs and notification bubbles indicating low stock or urgent deliveries" class="w-full h-32 object-cover mb-2" />
+                    <h3>Alerts</h3>
+                    <ul id="alerts"></ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Products Section -->
+        <section id="products" class="section hidden">
+            <h2 class="text-3xl font-bold mb-4">Product Management</h2>
+            <div class="bg-white p-4 rounded shadow-md mb-4">
+                <h3>Add New Product</h3>
+                <input id="productName" type="text" placeholder="Product Name" class="border p-2 w-full mb-2">
+                <select id="productCategory" class="border p-2 w-full mb-2">
+                    <option>Electronics</option>
+                    <option>Furniture</option>
+                    <option>Clothing</option>
+                </select>
+                <button onclick="addProduct()" class="bg-blue-500 text-white p-2 rounded">Add Product</button>
+            </div>
+            <ul id="productList" class="space-y-2"></ul>
+        </section>
+
+        <!-- Inventory Section -->
+        <section id="inventory" class="section hidden">
+            <h2 class="text-3xl font-bold mb-4">Inventory Management</h2>
+            <div class="bg-white p-4 rounded shadow-md mb-4">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="bg-gray-200">
+                            <th class="p-2">Product</th>
+                            <th class="p-2">Stock In</th>
+                            <th class="p-2">Stock Out</th>
+                            <th class="p-2">Current Stock</th>
+                            <th class="p-2">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventoryTable"></tbody>
+                </table>
+            </div>
+            <div class="bg-white p-4 rounded shadow-md">
+                <h3>Update Stock</h3>
+                <select id="updateProduct" class="border p-2 mr-2"></select>
+                <input id="updateStockIn" type="number" placeholder="Stock In" class="border p-2 mr-2">
+                <input id="updateStockOut" type="number" placeholder="Stock Out" class="border p-2 mr-2">
+                <button onclick="updateStock()" class="bg-green-500 text-white p-2 rounded">Update</button>
+            </div>
+        </section>
+
+        <!-- Inbound Section -->
+        <section id="inbound" class="section hidden">
+            <h2 class="text-3xl font-bold mb-4">Goods Receipt (Inbound)</h2>
+            <div class="bg-white p-4 rounded shadow-md">
+                <input id="receiptProduct" type="text" placeholder="Product" class="border p-2 w-full mb-2">
+                <input id="receiptQuantity" type="number" placeholder="Quantity" class="border p-2 w-full mb-2">
+                <input id="receiptLocation" type="text" placeholder="Location" class="border p-2 w-full mb-2">
+                <button onclick="processInbound()" class="bg-blue-500 text-white p-2 rounded">Process Receipt</button>
+            </div>
+            <ul id="receiptsList" class="mt-4 space-y-2"></ul>
+        </section>
+
+        <!-- Outbound Section -->
+        <section id="outbound" class="section hidden">
+            <h2 class="text-3xl font-bold mb-4">Shipment (Outbound)</h2>
+            <div class="bg-white p-4 rounded shadow-md">
+                <input id="shipmentProduct" type="text" placeholder="Product" class="border p-2 w-full mb-2">
+                <input id="shipmentQuantity" type="number" placeholder="Quantity" class="border p-2 w-full mb-2">
+                <input id="shipmentCustomer" type="text" placeholder="Customer" class="border p-2 w-full mb-2">
+                <button onclick="processOutbound()" class="bg-red-500 text-white p-2 rounded">Process Shipment</button>
+            </div>
+            <ul id="shipmentsList" class="mt-4 space-y-2"></ul>
+        </section>
+
+        <!-- Locations Section -->
+        <section id="locations" class="section hidden">
+            <h2 class="text-3xl font-bold mb-4">Warehouse Location Management</h2>
+            <div class="bg-white p-4 rounded shadow-md">
+                <input id="locationProduct" type="text" placeholder="Product" class="border p-2 w-full mb-2">
+                <input id="locationRack" type="text" placeholder="Rack, Aisle, Zone" class="border p-2 w-full mb-2">
+                <button onclick="assignLocation()" class="bg-purple-500 text-white p-2 rounded">Assign Location</button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                <div class="bg-gray-50 p-4 rounded">
+                    <h3>Rack A1</h3>
+                    <p id="rackA1">Empty</p>
+                </div>
+                <div class="bg-gray-50 p-4 rounded">
+                    <h3>Rack A2</h3>
+                    <p id="rackA2">Empty</p>
+                </div>
+                <div class="bg-gray-50 p-4 rounded">
+                    <h3>Rack B1</h3>
+                    <p id="rackB1">Empty</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Users Section -->
+        <section id="users" class="section hidden">
+            <h2 class="text-3xl font-bold mb-4">User and Role Management</h2>
+            <div class="bg-white p-4 rounded shadow-md mb-4">
+                <input id="userName" type="text" placeholder="Username" class="border p-2 w-full mb-2">
+                <select id="userRole" class="border p-2 w-full mb-2">
+                    <option>Admin</option>
+                    <option>Staff</option>
+                    <option>Supervisor</option>
+                </select>
+                <button onclick="addUser()" class="bg-blue-500 text-white p-2 rounded">Add User</button>
+            </div>
+            <ul id="userList" class="space-y-2"></ul>
+        </section>
+
+        <!-- Reports Section -->
+        <section id="reports" class="section hidden">
+            <h2 class="text-3xl font-bold mb-4">Reports and Analytics</h2>
+            <div class="bg-white p-4 rounded shadow-md">
+                <canvas id="stockChart" width="400" height="200"></canvas>
+                <button onclick="generateReport()" class="bg-green-500 text-white p-2 rounded mt-4">Generate Report</button>
+                <div id="reportData"></div>
+            </div>
+        </section>
+
+        <!-- Barcode Section -->
+        <section id="barcode" class="section hidden">
+            <h2 class="text-3xl font-bold mb-4">Barcode/QR Code Integration</h2>
+            <div class="bg-white p-4 rounded shadow-md">
+                <input id="barcodeInput" type="text" placeholder="Scan or Enter Barcode" class="border p-2 w-full mb-2">
+                <button onclick="scanBarcode()" class="bg-cyan-500 text-white p-2 rounded">Scan/Update</button>
+                <div id="barcodeResult"></div>
+            </div>
+        </section>
+
+        <!-- Notifications Section -->
+        <section id="notifications" class="section hidden">
+            <h2 class="text-3xl font-bold mb-4">Notifications and Alerts</h2>
+            <div class="bg-white p-4 rounded shadow-md">
+                <ul id="notificationList" class="space-y-2">
+                    <li class="p-2 bg-yellow-100">Low Stock Alert for Item XYZ</li>
+                    <li class="p-2 bg-red-100">Shipment Delayed</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Audit Section -->
+        <section id="audit" class="section hidden">
+            <h2 class="text-3xl font-bold mb-4">Audit Trail</h2>
+            <div class="bg-white p-4 rounded shadow-md">
+                <ul id="auditList" class="space-y-2"></ul>
+            </div>
+        </section>
+
+        <!-- Multi-Warehouse Section -->
+        <section id="multiwarehouse" class="section hidden">
+            <h2 class="text-3xl font-bold mb-4">Multi-Warehouse Support</h2>
+            <div class="bg-white p-4 rounded shadow-md mb-4">
+                <select id="warehouseSelect" class="border p-2 w-full mb-2">
+                    <option>Warehouse A</option>
+                    <option>Warehouse B</option>
+                    <option>Warehouse C</option>
+                </select>
+                <button onclick="switchWarehouse()" class="bg-indigo-500 text-white p-2 rounded">Switch Warehouse</button>
+            </div>
+            <div id="warehouseInfo"></div>
+        </section>
+    </main>
+
+    <script>
+        // Mock data using localStorage
+        let products = JSON.parse(localStorage.getItem('products')) || [];
+        let inventory = JSON.parse(localStorage.getItem('inventory')) || {};
+        let receipts = JSON.parse(localStorage.getItem('receipts')) || [];
+        let shipments = JSON.parse(localStorage.getItem('shipments')) || [];
+        let locations = JSON.parse(localStorage.getItem('locations')) || {};
+        let users = JSON.parse(localStorage.getItem('users')) || [];
+        let auditTrail = JSON.parse(localStorage.getItem('auditTrail')) || [];
+
+        function showSection(section) {
+            document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
+            document.getElementById(section).classList.remove('hidden');
+            if (section === 'dashboard') updateDashboard();
+        }
+
+        function toggleMobileMenu() {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        }
+
+        // Dashboard functions
+        function updateDashboard() {
+            document.getElementById('totalStock').textContent = Object.values(inventory).reduce((sum, item) => sum + item.stock, 0);
+            document.getElementById('recentActivities').innerHTML = receipts.slice(0, 3).map(r => `<li>${r.product} received</li>`).join('');
+            document.getElementById('alerts').innerHTML = shipments.slice(0, 2).map(s => `<li>Shipment to ${s.customer}</li>`).join('');
+        }
+
+        // Product functions
+        function addProduct() {
+            const name = document.getElementById('productName').value;
+            const category = document.getElementById('productCategory').value;
+            if (name) {
+                products.push({ name, category });
+                localStorage.setItem('products', JSON.stringify(products));
+                renderProducts();
+                auditTrail.push(`Added product: ${name}`);
+                localStorage.setItem('auditTrail', JSON.stringify(auditTrail));
+            }
+        }
+
+        function renderProducts() {
+            document.getElementById('productList').innerHTML = products.map(p => `<li class="p-2 bg-gray-50 rounded">${p.name} - ${p.category}</li>`).join('');
+        }
+
+        // Inventory functions
+        function renderInventory() {
+            document.getElementById('inventoryTable').innerHTML = products.map(p => `
+                <tr>
+                    <td class="p-2">${p.name}</td>
+                    <td class="p-2">${inventory[p.name]?.in || 0}</td>
+                    <td class="p-2">${inventory[p.name]?.out || 0}</td>
+                    <td class="p-2">${inventory[p.name]?.stock || 0}</td>
+                    <td class="p-2">
+                        <button onclick="editInventory('${p.name}')" class="bg-yellow-500 text-white p-1 rounded">Edit</button>
+                        <button onclick="deleteInventory('${p.name}')" class="bg-red-500 text-white p-1 rounded">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+            const updateProduct = document.getElementById('updateProduct');
+            updateProduct.innerHTML = products.map(p => `<option>${p.name}</option>`).join('');
+        }
+
+        function updateStock() {
+            const prod = document.getElementById('updateProduct').value;
+            const inVal = parseInt(document.getElementById('updateStockIn').value) || 0;
+            const outVal = parseInt(document.getElementById('updateStockOut').value) || 0;
+            inventory[prod] = {
+                in: (inventory[prod]?.in || 0) + inVal,
+                out: (inventory[prod]?.out || 0) + outVal,
+                stock: (inventory[prod]?.stock || 0) + inVal - outVal
+            };
+            localStorage.setItem('inventory', JSON.stringify(inventory));
+            renderInventory();
+        }
+
+        // Inbound
+        function processInbound() {
+            const prod = document.getElementById('receiptProduct').value;
+            const qty = parseInt(document.getElementById('receiptQuantity').value);
+            const loc = document.getElementById('receiptLocation').value;
+            if (prod && qty) {
+                receipts.unshift({ product: prod, quantity: qty, location: loc, date: new Date().toISOString() });
+                localStorage.setItem('receipts', JSON.stringify(receipts));
+                renderReceipts();
+                if (inventory[prod]) inventory[prod].in += qty; else inventory[prod] = { in: qty, out: 0, stock: qty };
+                localStorage.setItem('inventory', JSON.stringify(inventory));
+            }
+        }
+
+        function renderReceipts() {
+            document.getElementById('receiptsList').innerHTML = receipts.slice(0, 5).map(r => `<li class="p-2 bg-green-50 rounded">${r.product} x${r.quantity} at ${r.location}</li>`).join('');
+        }
+
+        // Outbound
+        function processOutbound() {
+            const prod = document.getElementById('shipmentProduct').value;
+            const qty = parseInt(document.getElementById('shipmentQuantity').value);
+            const cust = document.getElementById('shipmentCustomer').value;
+            if (prod && qty && inventory[prod]?.stock >= qty) {
+                shipments.unshift({ product: prod, quantity: qty, customer: cust, date: new Date().toISOString() });
+                localStorage.setItem('shipments', JSON.stringify(shipments));
+                renderShipments();
+                inventory[prod].out += qty;
+                inventory[prod].stock -= qty;
+                localStorage.setItem('inventory', JSON.stringify(inventory));
+            }
+        }
+
+        function renderShipments() {
+            document.getElementById('shipmentsList').innerHTML = shipments.slice(0, 5).map(s => `<li class="p-2 bg-red-50 rounded">${s.product} x${s.quantity} to ${s.customer}</li>`).join('');
+        }
+
+        // Locations
+        function assignLocation() {
+            const prod = document.getElementById('locationProduct').value;
+            const loc = document.getElementById('locationRack').value;
+            locations[loc] = prod;
+            localStorage.setItem('locations', JSON.stringify(locations));
+            renderLocations();
+        }
+
+        function renderLocations() {
+            document.getElementById('rackA1').textContent = locations['A1'] || 'Empty';
+            document.getElementById('rackA2').textContent = locations['A2'] || 'Empty';
+            document.getElementById('rackB1').textContent = locations['B1'] || 'Empty';
+        }
+
+        // Users
+        function addUser() {
+            const name = document.getElementById('userName').value;
+            const role = document.getElementById('userRole').value;
+            if (name) {
+                users.push({ name, role });
+                localStorage.setItem('users', JSON.stringify(users));
+                renderUsers();
+            }
+        }
+
+        function renderUsers() {
+            document.getElementById('userList').innerHTML = users.map(u => `<li class="p-2 bg-blue-50 rounded">${u.name} - ${u.role}</li>`).join('');
+        }
+
+        // Reports (Simulated chart with Canvas)
+        let chart = null;
+        function generateReport() {
+            const ctx = document.getElementById('stockChart').getContext('2d');
+            if (chart) chart.destroy();
+            const labels = products.map(p => p.name);
+            const data = products.map(p => inventory[p.name]?.stock || 0);
+            chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'Stock Levels',
+                        data,
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                    }]
+                }
+            });
+            document.getElementById('reportData').innerHTML = `<p>Total products: ${products.length}</p><p>Total stock: ${data.reduce((a, b) => a + b, 0)}</p>`;
+        }
+
+        // Barcode
+        function scanBarcode() {
+            const code = document.getElementById('barcodeInput').value;
+            document.getElementById('barcodeResult').innerHTML = `<p>Scanned: ${code} - Mocking update for product ${code}</p>`;
+            // Simulate update
+            if (inventory[code]) {
+                inventory[code].stock += 1;
+                localStorage.setItem('inventory', JSON.stringify(inventory));
+                renderInventory();
+            }
+        }
+
+        // Audit
+        function renderAudit() {
+            document.getElementById('auditList').innerHTML = auditTrail.slice(0, 10).map(a => `<li class="p-2 bg-gray-100 rounded">${a}</li>`).join('');
+        }
+
+        // Multi-Warehouse
+        function switchWarehouse() {
+            const wh = document.getElementById('warehouseSelect').value;
+            document.getElementById('warehouseInfo').innerHTML = `<p>Switched to ${wh}. Data simulated.</p>`;
+        }
+
+        // Initialize
+        showSection('dashboard');
+        renderProducts();
+        renderInventory();
+        renderReceipts();
+        renderShipments();
+        renderLocations();
+        renderUsers();
+        renderAudit();
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</body>
+</html>
+</content>
+</create_file>
