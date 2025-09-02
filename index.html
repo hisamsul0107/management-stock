@@ -1,455 +1,435 @@
-<!doctype html>
-<html lang="id">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Inventori — Mobile + Google Sheets</title>
-<link rel="icon" href="data:;base64,iVBORw0KGgo=">
-<style>
-  :root{
-    --sidebar:#243347; --accent:#2b7be4; --card:#ffffff; --bg:#f3f6f9; --danger:#ffe6e6;
-  }
-  *{box-sizing:border-box}
-  body{margin:0;font-family:Inter, system-ui, Arial;color:#0f1724;background:var(--bg);display:flex;min-height:100vh}
-  /* Sidebar */
-  .sidebar{
-    width:240px;background:var(--sidebar);color:#fff;flex-shrink:0;padding:18px 12px;display:flex;flex-direction:column;
-    position:fixed;left:0;top:0;bottom:0;
-  }
-  .brand{font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
-  .menu{list-style:none;padding:0;margin:0;flex:1}
-  .menu li{padding:12px 10px;border-radius:8px;cursor:pointer;margin-bottom:6px}
-  .menu li.active{background:rgba(255,255,255,0.06)}
-  .sidebar-footer{font-size:12px;color:#cbd5e1;margin-top:auto}
-  /* Main */
-  .main{margin-left:240px;padding:18px;flex:1}
-  .topbar{display:flex;align-items:center;gap:12px;margin-bottom:14px}
-  .hamb{display:none;background:var(--sidebar);color:#fff;border:none;padding:8px;border-radius:8px}
-  .card{background:var(--card);padding:14px;border-radius:10px;box-shadow:0 6px 20px rgba(19,31,58,0.04);margin-bottom:14px}
-  h1,h2{margin:0 0 8px 0}
-  .grid{display:grid;gap:10px}
-  .grid.cols-2{grid-template-columns:1fr 1fr}
-  .grid.cols-3{grid-template-columns:repeat(3,1fr)}
-  label{font-size:13px;color:#334155}
-  input,select,textarea,button{width:100%;padding:10px;border-radius:8px;border:1px solid #e6eef6;font-size:14px}
-  button{background:var(--accent);color:#fff;border:none;cursor:pointer}
-  .btn-outline{background:transparent;border:1px solid #e2e8f0;color:#0f1724}
-  table{width:100%;border-collapse:collapse;font-size:14px}
-  th,td{padding:8px;border-bottom:1px solid #eef2f7;text-align:left}
-  thead th{background:#eef6ff;color:#0f1724}
-  tr.low-stock{background:var(--danger)}
-  /* responsive */
-  @media (max-width:900px){
-    .sidebar{position:fixed;transform:translateX(-100%);transition:transform .18s ease;z-index:30}
-    .sidebar.open{transform:translateX(0)}
-    .main{margin-left:0;padding:12px}
-    .hamb{display:inline-block}
-  }
-  /* small helpers */
-  .row{display:flex;gap:10px}
-  .col{flex:1}
-  .muted{color:#64748b;font-size:13px}
-  .tiny{font-size:12px;color:#64748b}
-  .actions{display:flex;gap:8px;align-items:center}
-  .hidden{display:none!important}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Warehouse Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for uniqueness */
+        .nav-link { transition: all 0.3s ease; }
+        .nav-link:hover { transform: scale(1.05); }
+        .fade-in { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .hidden { display: none !important; }
+    </style>
 </head>
-<body>
-
-<!-- SIDEBAR -->
-<aside class="sidebar" id="sidebar">
-  <div class="brand">📦 <span>Inventori</span></div>
-  <ul class="menu" id="menu">
-    <li data-page="dashboard" class="active">Dashboard</li>
-    <li data-page="form">Form Transaksi</li>
-    <li data-page="masuk">Data Masuk</li>
-    <li data-page="keluar">Data Keluar</li>
-    <li data-page="db">Database Barang</li>
-    <li data-page="riwayat">Riwayat Transaksi</li>
-  </ul>
-  <div class="sidebar-footer tiny">Mobile friendly — Sinkron: Google Sheets (Apps Script) atau localStorage</div>
-</aside>
-
-<!-- MAIN -->
-<div class="main">
-  <div class="topbar">
-    <button class="hamb" id="hamb">☰</button>
-    <h1 style="font-size:18px">Sistem Inventori</h1>
-    <div style="margin-left:auto" id="syncStatus" class="tiny muted">Sync: <span id="syncLabel">local</span></div>
-  </div>
-
-  <!-- PAGES -->
-  <section id="page-dashboard" class="card">
-    <h2>Dashboard</h2>
-    <div class="grid cols-3" style="margin-top:8px">
-      <div class="card"><div class="tiny">Total Barang</div><div id="statTotalBarang" style="font-weight:700;font-size:20px">0</div></div>
-      <div class="card"><div class="tiny">Total Stok</div><div id="statTotalStok" style="font-weight:700;font-size:20px">0</div></div>
-      <div class="card"><div class="tiny">Hampir Habis (SOH ≤ Min)</div><div id="statLow" style="font-weight:700;font-size:20px">0</div></div>
-    </div>
-    <div class="card" style="margin-top:12px"><canvas id="chartStok" height="80"></canvas></div>
-  </section>
-
-  <section id="page-form" class="card hidden">
-    <h2>Form Transaksi</h2>
-    <form id="txForm" onsubmit="return false;">
-      <div class="grid cols-3" style="align-items:start">
-        <div>
-          <label>Kode Barang</label>
-          <input id="f_kode" placeholder="Kode Barang (wajib)">
+<body class="bg-gray-100 font-sans">
+    <header class="bg-blue-600 text-white p-4 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold">WMS - Warehouse Management System</h1>
+            <nav class="hidden md:flex space-x-4">
+                <button class="nav-link" onclick="showSection('dashboard')">Dashboard</button>
+                <button class="nav-link" onclick="showSection('products')">Products</button>
+                <button class="nav-link" onclick="showSection('inventory')">Inventory</button>
+                <button class="nav-link" onclick="showSection('inbound')">Inbound</button>
+                <button class="nav-link" onclick="showSection('outbound')">Outbound</button>
+                <button class="nav-link" onclick="showSection('locations')">Locations</button>
+                <button class="nav-link" onclick="showSection('users')">Users</button>
+                <button class="nav-link" onclick="showSection('reports')">Reports</button>
+                <button class="nav-link" onclick="showSection('barcode')">Barcode</button>
+                <button class="nav-link" onclick="showSection('notifications')">Notifications</button>
+                <button class="nav-link" onclick="showSection('audit')">Audit Trail</button>
+                <button class="nav-link" onclick="showSection('multiwarehouse')">Multi-Warehouse</button>
+            </nav>
+            <button class="md:hidden" onclick="toggleMobileMenu()">Menu</button>
         </div>
-        <div>
-          <label>Nama Barang</label>
-          <input id="f_nama" placeholder="Nama Barang">
+        <div id="mobile-menu" class="hidden md:hidden mt-2">
+            <button class="block nav-link text-left w-full" onclick="showSection('dashboard')">Dashboard</button>
+            <button class="block nav-link text-left w-full" onclick="showSection('products')">Products</button>
+            <button class="block nav-link text-left w-full" onclick="showSection('inventory')">Inventory</button>
+            <button class="block nav-link text-left w-full" onclick="showSection('inbound')">Inbound</button>
+            <button class="block nav-link text-left w-full" onclick="showSection('outbound')">Outbound</button>
+            <button class="block nav-link text-left w-full" onclick="showSection('locations')">Locations</button>
+            <button class="block nav-link text-left w-full" onclick="showSection('users')">Users</button>
+            <button class="block nav-link text-left w-full" onclick="showSection('reports')">Reports</button>
+            <button class="block nav-link text-left w-full" onclick="showSection('barcode')">Barcode</button>
+            <button class="block nav-link text-left w-full" onclick="showSection('notifications')">Notifications</button>
+            <button class="block nav-link text-left w-full" onclick="showSection('audit')">Audit Trail</button>
+            <button class="block nav-link text-left w-full" onclick="showSection('multiwarehouse')">Multi-Warehouse</button>
         </div>
-        <div>
-          <label>Unit (D-Unit)</label>
-          <input id="f_unit" placeholder="pcs/box/kg">
-        </div>
+    </header>
 
-        <div>
-          <label>Qty</label>
-          <input id="f_qty" type="number" min="1" value="1">
-        </div>
-        <div>
-          <label>Store</label>
-          <input id="f_store" placeholder="Nama store / gudang">
-        </div>
-        <div>
-          <label>No Receiving (opsional)</label>
-          <input id="f_receiving" placeholder="No Receiving">
-        </div>
+    <main class="container mx-auto p-6">
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="section">
+            <h2 class="text-3xl font-bold mb-4">Dashboard Overview</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-white p-4 rounded shadow-md">
+                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/5f286251-2cd7-4609-99f3-f5796f6a9728.png" alt="Warehouse inventory overview with shelves stocked with various products like boxes, electronics, and machinery in a modern industrial setting" class="w-full h-32 object-cover mb-2" />
+                    <h3>Total Stock</h3>
+                    <p id="totalStock">Loading...</p>
+                </div>
+                <div class="bg-white p-4 rounded shadow-md">
+                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/92c4f5d1-4761-4b39-bf9e-fbdb5a18f86d.png" alt="Recent activities in warehouse showing staff handling packaged goods and digital screens displaying shipment logs" class="w-full h-32 object-cover mb-2" />
+                    <h3>Recent Activities</h3>
+                    <ul id="recentActivities"></ul>
+                </div>
+                <div class="bg-white p-4 rounded shadow-md">
+                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/b95ecc9e-920e-44ee-8b4f-500141844bc6.png" alt="Alert notifications with icons of warning signs and notification bubbles indicating low stock or urgent deliveries" class="w-full h-32 object-cover mb-2" />
+                    <h3>Alerts</h3>
+                    <ul id="alerts"></ul>
+                </div>
+            </div>
+        </section>
 
-        <div style="grid-column:1/4">
-          <label>Keterangan</label>
-          <textarea id="f_ket" placeholder="Keterangan..." rows="2"></textarea>
-        </div>
+        <!-- Products Section -->
+        <section id="products" class="section hidden">
+            <h2 class="text-3xl font-bold mb-4">Product Management</h2>
+            <div class="bg-white p-4 rounded shadow-md mb-4">
+                <h3>Add New Product</h3>
+                <input id="productName" type="text" placeholder="Product Name" class="border p-2 w-full mb-2">
+                <select id="productCategory" class="border p-2 w-full mb-2">
+                    <option>Electronics</option>
+                    <option>Furniture</option>
+                    <option>Clothing</option>
+                </select>
+                <button onclick="addProduct()" class="bg-blue-500 text-white p-2 rounded">Add Product</button>
+            </div>
+            <ul id="productList" class="space-y-2"></ul>
+        </section>
 
-        <div style="display:flex;gap:10px;grid-column:1/4;margin-top:6px">
-          <button id="btnIn" type="button">➕ Masuk</button>
-          <button id="btnOut" type="button" style="background:#ef4444">➖ Keluar</button>
-          <button id="btnClear" type="button" class="btn-outline">Clear</button>
-          <div style="margin-left:auto" class="tiny muted">Gunakan Apps Script URL untuk sinkron otomatis</div>
-        </div>
-      </div>
-    </form>
+        <!-- Inventory Section -->
+        <section id="inventory" class="section hidden">
+            <h2 class="text-3xl font-bold mb-4">Inventory Management</h2>
+            <div class="bg-white p-4 rounded shadow-md mb-4">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="bg-gray-200">
+                            <th class="p-2">Product</th>
+                            <th class="p-2">Stock In</th>
+                            <th class="p-2">Stock Out</th>
+                            <th class="p-2">Current Stock</th>
+                            <th class="p-2">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventoryTable"></tbody>
+                </table>
+            </div>
+            <div class="bg-white p-4 rounded shadow-md">
+                <h3>Update Stock</h3>
+                <select id="updateProduct" class="border p-2 mr-2"></select>
+                <input id="updateStockIn" type="number" placeholder="Stock In" class="border p-2 mr-2">
+                <input id="updateStockOut" type="number" placeholder="Stock Out" class="border p-2 mr-2">
+                <button onclick="updateStock()" class="bg-green-500 text-white p-2 rounded">Update</button>
+            </div>
+        </section>
 
-    <h3 style="margin-top:14px">Riwayat Stock (barang yang dipilih)</h3>
-    <div class="card">
-      <table id="tblRiwayatStok">
-        <thead><tr><th>Kode</th><th>Nama</th><th>Qty</th><th>Unit</th><th>Waktu</th><th>Store</th></tr></thead>
-        <tbody></tbody>
-      </table>
-    </div>
-  </section>
+        <!-- Inbound Section -->
+        <section id="inbound" class="section hidden">
+            <h2 class="text-3xl font-bold mb-4">Goods Receipt (Inbound)</h2>
+            <div class="bg-white p-4 rounded shadow-md">
+                <input id="receiptProduct" type="text" placeholder="Product" class="border p-2 w-full mb-2">
+                <input id="receiptQuantity" type="number" placeholder="Quantity" class="border p-2 w-full mb-2">
+                <input id="receiptLocation" type="text" placeholder="Location" class="border p-2 w-full mb-2">
+                <button onclick="processInbound()" class="bg-blue-500 text-white p-2 rounded">Process Receipt</button>
+            </div>
+            <ul id="receiptsList" class="mt-4 space-y-2"></ul>
+        </section>
 
-  <section id="page-masuk" class="card hidden">
-    <h2>Data Masuk</h2>
-    <div class="card"><table id="tblMasuk"><thead><tr><th>Waktu</th><th>Kode</th><th>Nama</th><th>Qty</th><th>Store</th></tr></thead><tbody></tbody></table></div>
-  </section>
+        <!-- Outbound Section -->
+        <section id="outbound" class="section hidden">
+            <h2 class="text-3xl font-bold mb-4">Shipment (Outbound)</h2>
+            <div class="bg-white p-4 rounded shadow-md">
+                <input id="shipmentProduct" type="text" placeholder="Product" class="border p-2 w-full mb-2">
+                <input id="shipmentQuantity" type="number" placeholder="Quantity" class="border p-2 w-full mb-2">
+                <input id="shipmentCustomer" type="text" placeholder="Customer" class="border p-2 w-full mb-2">
+                <button onclick="processOutbound()" class="bg-red-500 text-white p-2 rounded">Process Shipment</button>
+            </div>
+            <ul id="shipmentsList" class="mt-4 space-y-2"></ul>
+        </section>
 
-  <section id="page-keluar" class="card hidden">
-    <h2>Data Keluar</h2>
-    <div class="card"><table id="tblKeluar"><thead><tr><th>Waktu</th><th>Kode</th><th>Nama</th><th>Qty</th><th>Store</th></tr></thead><tbody></tbody></table></div>
-  </section>
+        <!-- Locations Section -->
+        <section id="locations" class="section hidden">
+            <h2 class="text-3xl font-bold mb-4">Warehouse Location Management</h2>
+            <div class="bg-white p-4 rounded shadow-md">
+                <input id="locationProduct" type="text" placeholder="Product" class="border p-2 w-full mb-2">
+                <input id="locationRack" type="text" placeholder="Rack, Aisle, Zone" class="border p-2 w-full mb-2">
+                <button onclick="assignLocation()" class="bg-purple-500 text-white p-2 rounded">Assign Location</button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                <div class="bg-gray-50 p-4 rounded">
+                    <h3>Rack A1</h3>
+                    <p id="rackA1">Empty</p>
+                </div>
+                <div class="bg-gray-50 p-4 rounded">
+                    <h3>Rack A2</h3>
+                    <p id="rackA2">Empty</p>
+                </div>
+                <div class="bg-gray-50 p-4 rounded">
+                    <h3>Rack B1</h3>
+                    <p id="rackB1">Empty</p>
+                </div>
+            </div>
+        </section>
 
-  <section id="page-db" class="card hidden">
-    <h2>Database Barang (edit di sini)</h2>
-    <div class="card">
-      <table id="tblDB">
-        <thead>
-          <tr><th>Kode</th><th>Nama</th><th>D-Unit</th><th>Actual-Price</th><th>SOH QTY</th><th>Actual Amount (SOH)</th><th>Req QTY</th><th>Actual Amount (Request)</th><th>Min Stock</th><th>Max Stock</th><th>Supplier</th></tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-      <div style="margin-top:8px" class="tiny muted">Jika item baru dibuat lewat form, hanya Kode/Nama/Unit akan terisi. Gunakan tabel ini untuk melengkapi pricing & min/max.</div>
-    </div>
-  </section>
+        <!-- Users Section -->
+        <section id="users" class="section hidden">
+            <h2 class="text-3xl font-bold mb-4">User and Role Management</h2>
+            <div class="bg-white p-4 rounded shadow-md mb-4">
+                <input id="userName" type="text" placeholder="Username" class="border p-2 w-full mb-2">
+                <select id="userRole" class="border p-2 w-full mb-2">
+                    <option>Admin</option>
+                    <option>Staff</option>
+                    <option>Supervisor</option>
+                </select>
+                <button onclick="addUser()" class="bg-blue-500 text-white p-2 rounded">Add User</button>
+            </div>
+            <ul id="userList" class="space-y-2"></ul>
+        </section>
 
-  <section id="page-riwayat" class="card hidden">
-    <h2>Riwayat Transaksi</h2>
-    <div class="card"><table id="tblHistory"><thead><tr><th>Waktu</th><th>Jenis</th><th>Kode</th><th>Nama</th><th>Qty</th><th>Unit</th><th>Store</th><th>Ket</th><th>No Recv</th></tr></thead><tbody></tbody></table></div>
-  </section>
+        <!-- Reports Section -->
+        <section id="reports" class="section hidden">
+            <h2 class="text-3xl font-bold mb-4">Reports and Analytics</h2>
+            <div class="bg-white p-4 rounded shadow-md">
+                <canvas id="stockChart" width="400" height="200"></canvas>
+                <button onclick="generateReport()" class="bg-green-500 text-white p-2 rounded mt-4">Generate Report</button>
+                <div id="reportData"></div>
+            </div>
+        </section>
 
-  <!-- small config panel -->
-  <div class="card" style="margin-top:10px">
-    <h3 style="margin-bottom:8px">Konfigurasi Sinkronisasi</h3>
-    <div class="grid cols-2">
-      <div>
-        <label>Apps Script Web App URL (kosong = localStorage)</label>
-        <input id="config_webapp" placeholder="https://script.google.com/macros/s/XXXXXXXX/exec">
-      </div>
-      <div>
-        <label>ID Spreadsheet (optional)</label>
-        <input id="config_sheetid" placeholder="Spreadsheet ID">
-      </div>
-    </div>
-    <div class="tiny muted" style="margin-top:8px">Ikuti panduan Apps Script yang diberikan di README (di bawah).</div>
-  </div>
+        <!-- Barcode Section -->
+        <section id="barcode" class="section hidden">
+            <h2 class="text-3xl font-bold mb-4">Barcode/QR Code Integration</h2>
+            <div class="bg-white p-4 rounded shadow-md">
+                <input id="barcodeInput" type="text" placeholder="Scan or Enter Barcode" class="border p-2 w-full mb-2">
+                <button onclick="scanBarcode()" class="bg-cyan-500 text-white p-2 rounded">Scan/Update</button>
+                <div id="barcodeResult"></div>
+            </div>
+        </section>
 
-</div>
+        <!-- Notifications Section -->
+        <section id="notifications" class="section hidden">
+            <h2 class="text-3xl font-bold mb-4">Notifications and Alerts</h2>
+            <div class="bg-white p-4 rounded shadow-md">
+                <ul id="notificationList" class="space-y-2">
+                    <li class="p-2 bg-yellow-100">Low Stock Alert for Item XYZ</li>
+                    <li class="p-2 bg-red-100">Shipment Delayed</li>
+                </ul>
+            </div>
+        </section>
 
-<script>
-/* ===========================
-   Client side logic
-   - fallback to localStorage if no WebApp URL provided
-   - when WebApp configured, function postToGAS will push transaction
-   =========================== */
-const STATE_KEYS = {
-  DB: 'inv_db_v2',
-  IN: 'inv_in_v2',
-  OUT: 'inv_out_v2',
-  HISTORY: 'inv_hist_v2'
-};
+        <!-- Audit Section -->
+        <section id="audit" class="section hidden">
+            <h2 class="text-3xl font-bold mb-4">Audit Trail</h2>
+            <div class="bg-white p-4 rounded shadow-md">
+                <ul id="auditList" class="space-y-2"></ul>
+            </div>
+        </section>
 
-let db = JSON.parse(localStorage.getItem(STATE_KEYS.DB) || '[]');
-let incoming = JSON.parse(localStorage.getItem(STATE_KEYS.IN) || '[]');
-let outgoing = JSON.parse(localStorage.getItem(STATE_KEYS.OUT) || '[]');
-let historyTx = JSON.parse(localStorage.getItem(STATE_KEYS.HISTORY) || '[]');
+        <!-- Multi-Warehouse Section -->
+        <section id="multiwarehouse" class="section hidden">
+            <h2 class="text-3xl font-bold mb-4">Multi-Warehouse Support</h2>
+            <div class="bg-white p-4 rounded shadow-md mb-4">
+                <select id="warehouseSelect" class="border p-2 w-full mb-2">
+                    <option>Warehouse A</option>
+                    <option>Warehouse B</option>
+                    <option>Warehouse C</option>
+                </select>
+                <button onclick="switchWarehouse()" class="bg-indigo-500 text-white p-2 rounded">Switch Warehouse</button>
+            </div>
+            <div id="warehouseInfo"></div>
+        </section>
+    </main>
 
-const el = id => document.getElementById(id);
-const menuItems = document.querySelectorAll('#menu li');
-menuItems.forEach(li => li.addEventListener('click', (e)=> {
-  menuItems.forEach(x=>x.classList.remove('active'));
-  li.classList.add('active');
-  showPage(li.dataset.page);
-}));
+    <script>
+        // Mock data using localStorage
+        let products = JSON.parse(localStorage.getItem('products')) || [];
+        let inventory = JSON.parse(localStorage.getItem('inventory')) || {};
+        let receipts = JSON.parse(localStorage.getItem('receipts')) || [];
+        let shipments = JSON.parse(localStorage.getItem('shipments')) || [];
+        let locations = JSON.parse(localStorage.getItem('locations')) || {};
+        let users = JSON.parse(localStorage.getItem('users')) || [];
+        let auditTrail = JSON.parse(localStorage.getItem('auditTrail')) || [];
 
-el('hamb').addEventListener('click', ()=> document.getElementById('sidebar').classList.toggle('open'));
+        function showSection(section) {
+            document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
+            document.getElementById(section).classList.remove('hidden');
+            if (section === 'dashboard') updateDashboard();
+        }
 
-function showPage(name){
-  document.querySelectorAll('.main > section').forEach(s => s.classList.add('hidden'));
-  const p = document.getElementById('page-' + name);
-  if (p) p.classList.remove('hidden');
-  renderAll();
-}
+        function toggleMobileMenu() {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        }
 
-/* render helpers */
-function saveAllLocal(){
-  localStorage.setItem(STATE_KEYS.DB, JSON.stringify(db));
-  localStorage.setItem(STATE_KEYS.IN, JSON.stringify(incoming));
-  localStorage.setItem(STATE_KEYS.OUT, JSON.stringify(outgoing));
-  localStorage.setItem(STATE_KEYS.HISTORY, JSON.stringify(historyTx));
-}
+        // Dashboard functions
+        function updateDashboard() {
+            document.getElementById('totalStock').textContent = Object.values(inventory).reduce((sum, item) => sum + item.stock, 0);
+            document.getElementById('recentActivities').innerHTML = receipts.slice(0, 3).map(r => `<li>${r.product} received</li>`).join('');
+            document.getElementById('alerts').innerHTML = shipments.slice(0, 2).map(s => `<li>Shipment to ${s.customer}</li>`).join('');
+        }
 
-function renderAll(){
-  renderDashboard();
-  renderDB();
-  renderInOut();
-  renderHistory();
-}
+        // Product functions
+        function addProduct() {
+            const name = document.getElementById('productName').value;
+            const category = document.getElementById('productCategory').value;
+            if (name) {
+                products.push({ name, category });
+                localStorage.setItem('products', JSON.stringify(products));
+                renderProducts();
+                auditTrail.push(`Added product: ${name}`);
+                localStorage.setItem('auditTrail', JSON.stringify(auditTrail));
+            }
+        }
 
-/* Dashboard */
-function renderDashboard(){
-  el('statTotalBarang').innerText = db.length;
-  el('statTotalStok').innerText = db.reduce((s,i)=>s+(Number(i.sohQty)||0),0);
-  el('statLow').innerText = db.filter(i => (Number(i.minStock)||0) >= (Number(i.sohQty)||0)).length;
-  // chart (simple)
-  const ctx = document.getElementById('chartStok');
-  const labels = db.map(x=>x.nama || x.kode);
-  const data = db.map(x=>Number(x.sohQty)||0);
-  if (window._chart) window._chart.destroy();
-  window._chart = new Chart(ctx, {type:'bar',data:{labels, datasets:[{label:'SOH',data, backgroundColor:'#2b7be4'}]}, options:{plugins:{legend:{display:false}}}});
-}
+        function renderProducts() {
+            document.getElementById('productList').innerHTML = products.map(p => `<li class="p-2 bg-gray-50 rounded">${p.name} - ${p.category}</li>`).join('');
+        }
 
-/* Database render/edit */
-function renderDB(){
-  const tbody = document.querySelector('#tblDB tbody'); tbody.innerHTML = '';
-  db.forEach(it => {
-    const amtSOH = (Number(it.sohQty)||0) * (Number(it.actualPrice)||0);
-    const amtReq = (Number(it.reqQty)||0) * (Number(it.actualPrice)||0);
-    const tr = document.createElement('tr');
-    if ((Number(it.sohQty)||0) <= (Number(it.minStock)||0)) tr.classList.add('low-stock');
-    tr.innerHTML = `
-      <td>${it.kode}</td>
-      <td contenteditable="true" data-k="${it.kode}" data-field="nama">${it.nama||''}</td>
-      <td contenteditable="true" data-k="${it.kode}" data-field="dunit">${it.dUnit||''}</td>
-      <td contenteditable="true" data-k="${it.kode}" data-field="actualPrice">${it.actualPrice||''}</td>
-      <td>${it.sohQty||0}</td>
-      <td>${amtSOH.toFixed(2)}</td>
-      <td contenteditable="true" data-k="${it.kode}" data-field="reqQty">${it.reqQty||''}</td>
-      <td>${amtReq.toFixed(2)}</td>
-      <td contenteditable="true" data-k="${it.kode}" data-field="minStock">${it.minStock||''}</td>
-      <td contenteditable="true" data-k="${it.kode}" data-field="maxStock">${it.maxStock||''}</td>
-      <td contenteditable="true" data-k="${it.kode}" data-field="supplierName">${it.supplierName||''}</td>
-    `;
-    tbody.appendChild(tr);
-  });
-  // attach edit events
-  document.querySelectorAll('#tblDB td[contenteditable="true"]').forEach(td=>{
-    td.onblur = e => {
-      const k = td.getAttribute('data-k');
-      const f = td.getAttribute('data-field');
-      const val = td.innerText.trim();
-      const item = db.find(x=>x.kode===k);
-      if (!item) return;
-      // try number conversion for numeric fields
-      if (['actualPrice','reqQty','minStock','maxStock'].includes(f)){
-        item[f] = val === '' ? '' : Number(val);
-      } else item[f] = val;
-      saveAllLocal();
-      renderAll();
-      maybePushDBUpdate(item); // optional push to Google Sheets
-    };
-  });
-}
+        // Inventory functions
+        function renderInventory() {
+            document.getElementById('inventoryTable').innerHTML = products.map(p => `
+                <tr>
+                    <td class="p-2">${p.name}</td>
+                    <td class="p-2">${inventory[p.name]?.in || 0}</td>
+                    <td class="p-2">${inventory[p.name]?.out || 0}</td>
+                    <td class="p-2">${inventory[p.name]?.stock || 0}</td>
+                    <td class="p-2">
+                        <button onclick="editInventory('${p.name}')" class="bg-yellow-500 text-white p-1 rounded">Edit</button>
+                        <button onclick="deleteInventory('${p.name}')" class="bg-red-500 text-white p-1 rounded">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+            const updateProduct = document.getElementById('updateProduct');
+            updateProduct.innerHTML = products.map(p => `<option>${p.name}</option>`).join('');
+        }
 
-/* In/Out lists */
-function renderInOut(){
-  const tbIn = document.querySelector('#tblMasuk tbody'); tbIn.innerHTML = '';
-  incoming.slice().reverse().forEach(r=> tbIn.innerHTML += `<tr><td>${r.tanggal}</td><td>${r.kode}</td><td>${r.nama}</td><td>${r.qty}</td><td>${r.store}</td></tr>`);
-  const tbOut = document.querySelector('#tblKeluar tbody'); tbOut.innerHTML = '';
-  outgoing.slice().reverse().forEach(r=> tbOut.innerHTML += `<tr><td>${r.tanggal}</td><td>${r.kode}</td><td>${r.nama}</td><td>${r.qty}</td><td>${r.store}</td></tr>`);
-}
+        function updateStock() {
+            const prod = document.getElementById('updateProduct').value;
+            const inVal = parseInt(document.getElementById('updateStockIn').value) || 0;
+            const outVal = parseInt(document.getElementById('updateStockOut').value) || 0;
+            inventory[prod] = {
+                in: (inventory[prod]?.in || 0) + inVal,
+                out: (inventory[prod]?.out || 0) + outVal,
+                stock: (inventory[prod]?.stock || 0) + inVal - outVal
+            };
+            localStorage.setItem('inventory', JSON.stringify(inventory));
+            renderInventory();
+        }
 
-/* History */
-function renderHistory(){
-  const tb = document.querySelector('#tblHistory tbody'); tb.innerHTML = '';
-  historyTx.slice().reverse().forEach(h=>{
-    tb.innerHTML += `<tr><td>${h.tanggal}</td><td>${h.jenis}</td><td>${h.kode}</td><td>${h.nama}</td><td>${h.qty}</td><td>${h.unit||''}</td><td>${h.store||''}</td><td>${h.keterangan||''}</td><td>${h.receiving||''}</td></tr>`;
-  });
-}
+        // Inbound
+        function processInbound() {
+            const prod = document.getElementById('receiptProduct').value;
+            const qty = parseInt(document.getElementById('receiptQuantity').value);
+            const loc = document.getElementById('receiptLocation').value;
+            if (prod && qty) {
+                receipts.unshift({ product: prod, quantity: qty, location: loc, date: new Date().toISOString() });
+                localStorage.setItem('receipts', JSON.stringify(receipts));
+                renderReceipts();
+                if (inventory[prod]) inventory[prod].in += qty; else inventory[prod] = { in: qty, out: 0, stock: qty };
+                localStorage.setItem('inventory', JSON.stringify(inventory));
+            }
+        }
 
-/* Riwayat Stok per item */
-function renderRiwayatStok(kode){
-  const tbody = document.querySelector('#tblRiwayatStok tbody'); tbody.innerHTML = '';
-  const items = historyTx.filter(h => h.kode === kode).slice().reverse();
-  items.forEach(it => tbody.innerHTML += `<tr><td>${it.kode}</td><td>${it.nama}</td><td>${it.qty}</td><td>${it.unit||''}</td><td>${it.tanggal}</td><td>${it.store||''}</td></tr>`);
-}
+        function renderReceipts() {
+            document.getElementById('receiptsList').innerHTML = receipts.slice(0, 5).map(r => `<li class="p-2 bg-green-50 rounded">${r.product} x${r.quantity} at ${r.location}</li>`).join('');
+        }
 
-/* Add transaction */
-document.getElementById('btnIn').addEventListener('click', ()=> doTx('Masuk'));
-document.getElementById('btnOut').addEventListener('click', ()=> doTx('Keluar'));
-document.getElementById('btnClear').addEventListener('click', ()=> document.getElementById('txForm').reset());
+        // Outbound
+        function processOutbound() {
+            const prod = document.getElementById('shipmentProduct').value;
+            const qty = parseInt(document.getElementById('shipmentQuantity').value);
+            const cust = document.getElementById('shipmentCustomer').value;
+            if (prod && qty && inventory[prod]?.stock >= qty) {
+                shipments.unshift({ product: prod, quantity: qty, customer: cust, date: new Date().toISOString() });
+                localStorage.setItem('shipments', JSON.stringify(shipments));
+                renderShipments();
+                inventory[prod].out += qty;
+                inventory[prod].stock -= qty;
+                localStorage.setItem('inventory', JSON.stringify(inventory));
+            }
+        }
 
-async function doTx(type){
-  const kode = el('f_kode').value.trim();
-  const nama = el('f_nama').value.trim();
-  const unit = el('f_unit').value.trim();
-  const qty = Number(el('f_qty').value);
-  const store = el('f_store').value.trim();
-  const ket = el('f_ket').value.trim();
-  const recv = el('f_receiving').value.trim();
-  if (!kode || !nama || !unit || !qty || !store) { alert('Lengkapi Kode, Nama, Unit, Qty & Store'); return; }
+        function renderShipments() {
+            document.getElementById('shipmentsList').innerHTML = shipments.slice(0, 5).map(s => `<li class="p-2 bg-red-50 rounded">${s.product} x${s.quantity} to ${s.customer}</li>`).join('');
+        }
 
-  // ensure item in DB
-  let item = db.find(i=>i.kode===kode);
-  if (!item){
-    item = { kode, nama, dUnit: unit, actualPrice:'', sohQty:0, reqQty:'', minStock:'', maxStock:'', supplierName:'' };
-    db.push(item);
-  } else {
-    // sync name/unit if changed
-    item.nama = nama; item.dUnit = unit;
-  }
+        // Locations
+        function assignLocation() {
+            const prod = document.getElementById('locationProduct').value;
+            const loc = document.getElementById('locationRack').value;
+            locations[loc] = prod;
+            localStorage.setItem('locations', JSON.stringify(locations));
+            renderLocations();
+        }
 
-  const waktu = new Date().toLocaleString();
-  const record = { tanggal: waktu, jenis: type, kode, nama, qty, unit, store, keterangan: ket, receiving: recv };
+        function renderLocations() {
+            document.getElementById('rackA1').textContent = locations['A1'] || 'Empty';
+            document.getElementById('rackA2').textContent = locations['A2'] || 'Empty';
+            document.getElementById('rackB1').textContent = locations['B1'] || 'Empty';
+        }
 
-  // update DB and lists
-  if (type === 'Masuk'){
-    item.sohQty = (Number(item.sohQty)||0) + qty;
-    incoming.push({ tanggal:waktu, kode, nama, qty, store });
-  } else {
-    if ((Number(item.sohQty)||0) < qty) { alert('Stok tidak cukup!'); return; }
-    item.sohQty = (Number(item.sohQty)||0) - qty;
-    outgoing.push({ tanggal:waktu, kode, nama, qty, store });
-  }
-  historyTx.push(record);
-  saveAllLocal();
-  renderAll();
-  renderRiwayatStok(kode);
+        // Users
+        function addUser() {
+            const name = document.getElementById('userName').value;
+            const role = document.getElementById('userRole').value;
+            if (name) {
+                users.push({ name, role });
+                localStorage.setItem('users', JSON.stringify(users));
+                renderUsers();
+            }
+        }
 
-  // Try push to Google Apps Script if configured
-  const webapp = el('config_webapp').value.trim();
-  const sheetid = el('config_sheetid').value.trim();
-  if (webapp){
-    el('syncLabel').innerText = 'syncing...';
-    try {
-      // Post transaction to GAS endpoint
-      await postToGAS(webapp, {action:'addTransaction', sheet:null, payload: record, sheetId: sheetid});
-      // Also push DB update so spreadsheet reflects latest SOH
-      await postToGAS(webapp, {action:'updateItem', payload: item, sheetId: sheetid});
-      el('syncLabel').innerText = 'cloud';
-    } catch(err){
-      console.warn('GAS push failed', err);
-      el('syncLabel').innerText = 'local (push failed)';
-    }
-  } else {
-    el('syncLabel').innerText = 'local';
-  }
-}
+        function renderUsers() {
+            document.getElementById('userList').innerHTML = users.map(u => `<li class="p-2 bg-blue-50 rounded">${u.name} - ${u.role}</li>`).join('');
+        }
 
-/* Optional: push DB update to GAS when editing DB inline */
-async function maybePushDBUpdate(item){
-  const webapp = el('config_webapp').value.trim();
-  const sheetid = el('config_sheetid').value.trim();
-  if (!webapp) return;
-  try {
-    await postToGAS(webapp, {action:'updateItem', payload:item, sheetId: sheetid});
-  } catch(e){ console.warn('push failed', e); }
-}
+        // Reports (Simulated chart with Canvas)
+        let chart = null;
+        function generateReport() {
+            const ctx = document.getElementById('stockChart').getContext('2d');
+            if (chart) chart.destroy();
+            const labels = products.map(p => p.name);
+            const data = products.map(p => inventory[p.name]?.stock || 0);
+            chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'Stock Levels',
+                        data,
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                    }]
+                }
+            });
+            document.getElementById('reportData').innerHTML = `<p>Total products: ${products.length}</p><p>Total stock: ${data.reduce((a, b) => a + b, 0)}</p>`;
+        }
 
-/* POST helper to GAS (Apps Script Web App) */
-async function postToGAS(url, body){
-  const res = await fetch(url, {
-    method:'POST',
-    mode:'cors',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify(body)
-  });
-  if (!res.ok) throw new Error('Network response not ok: ' + res.status);
-  const j = await res.json();
-  if (j.status !== 'ok') throw new Error('GAS error: ' + j.message);
-  return j;
-}
+        // Barcode
+        function scanBarcode() {
+            const code = document.getElementById('barcodeInput').value;
+            document.getElementById('barcodeResult').innerHTML = `<p>Scanned: ${code} - Mocking update for product ${code}</p>`;
+            // Simulate update
+            if (inventory[code]) {
+                inventory[code].stock += 1;
+                localStorage.setItem('inventory', JSON.stringify(inventory));
+                renderInventory();
+            }
+        }
 
-/* Load from GAS: tries to fetch db and transactions
-   GAS must support GET with ?action=getAll (optional) */
-async function loadFromGAS(){
-  const webapp = el('config_webapp').value.trim();
-  const sheetid = el('config_sheetid').value.trim();
-  if (!webapp) { el('syncLabel').innerText='local'; return; }
-  try {
-    el('syncLabel').innerText = 'downloading...';
-    const url = webapp + '?action=getAll' + (sheetid?('&sheetId='+sheetid):'');
-    const res = await fetch(url);
-    const j = await res.json();
-    if (j.status === 'ok' && j.data){
-      db = j.data.db || db;
-      incoming = j.data.incoming || incoming;
-      outgoing = j.data.outgoing || outgoing;
-      historyTx = j.data.history || historyTx;
-      saveAllLocal();
-      renderAll();
-      el('syncLabel').innerText='cloud';
-    } else {
-      el('syncLabel').innerText='local (no data)';
-    }
-  } catch(e){
-    console.warn('Load from GAS failed', e);
-    el('syncLabel').innerText='local (fetch failed)';
-  }
-}
+        // Audit
+        function renderAudit() {
+            document.getElementById('auditList').innerHTML = auditTrail.slice(0, 10).map(a => `<li class="p-2 bg-gray-100 rounded">${a}</li>`).join('');
+        }
 
-/* init */
-renderAll();
+        // Multi-Warehouse
+        function switchWarehouse() {
+            const wh = document.getElementById('warehouseSelect').value;
+            document.getElementById('warehouseInfo').innerHTML = `<p>Switched to ${wh}. Data simulated.</p>`;
+        }
 
-/* If user fills webapp url & sheet id, try load data */
-el('config_webapp').addEventListener('change', loadFromGAS);
-el('config_sheetid').addEventListener('change', loadFromGAS);
-
-/* auto load when page opens: if config present in localStorage, restore */
-(function restoreConfig(){
-  const savedWeb = localStorage.getItem('inv_webapp_url');
-  const savedSheet = localStorage.getItem('inv_sheet_id');
-  if (savedWeb) el('config_webapp').value = savedWeb;
-  if (savedSheet) el('config_sheetid').value = savedSheet;
-  // store when changed
-  el('config_webapp').addEventListener('blur', ()=> localStorage.setItem('inv_webapp_url', el('config_webapp').value.trim()));
-  el('config_sheetid').addEventListener('blur', ()=> localStorage.setItem('inv_sheet_id', el('config_sheetid').value.trim()));
-  // try load if present
-  if (el('config_webapp').value) setTimeout(loadFromGAS, 600);
-})();
-
-</script>
+        // Initialize
+        showSection('dashboard');
+        renderProducts();
+        renderInventory();
+        renderReceipts();
+        renderShipments();
+        renderLocations();
+        renderUsers();
+        renderAudit();
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 </html>
+</content>
+</create_file>
